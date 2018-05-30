@@ -1,1 +1,7 @@
-# O diretório no qual se encontra este arquivo é a biblioteca trace_feature.
+import ruby.test as test
+
+def hello():
+    print("Hello, world")
+
+def trace_feature():
+        test.execute()
