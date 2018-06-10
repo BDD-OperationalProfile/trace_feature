@@ -44,7 +44,7 @@ def include_requirements():
 def execute_feature(path):
     feature_path = path + '/features/adicionar_filme.feature'
     print(feature_path)
-    subprocess.call(['cucumber', feature_path])
+    subprocess.call(['rails', 'cucumber', feature_path])
     print("AQUI FOI EM ")
     with open('coverage/cucumber/.resultset.json') as f:
         json_data = json.load(f)
