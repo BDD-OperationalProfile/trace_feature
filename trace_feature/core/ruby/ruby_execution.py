@@ -6,8 +6,26 @@ class RubyExecution(BaseExecution):
         self.class_definition_line = None
         self.method_definition_lines = []
 
-    def execute(self):
-        pass
+    def execute(self, gemfile):
+        self.check_gemfile(gemfile)
+
+    def check_gemfile(self, gemfile):
+        output = []
+        with open(gemfile, 'r+') as file:
+            for line in file:
+                output.append(line)
+                tokens = line.split()
+                if self.is_test_group(tokens):
+                    line = '  gem \'simplecov\', :require => false\n'
+                    output.append(line)
+            file.seek(0)
+            file.writelines(output)
+    
+    def is_test_group(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == 'group' and tokens[1] == ':test':
+                return True
+        return False
 
     def run_file(self, filename, cov_result):
         with open(filename) as file:
@@ -111,3 +129,7 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
+
+if  __name__ == "__main__":
+    a = RubyExecution()
+    a.execute('Gemfile')
