@@ -16,6 +16,7 @@ class RubyExecution(BaseExecution):
             
             self.get_class_definition_line(file)
             self.get_method_definition_lines(file, cov_result)
+            self.remove_not_executed_definitions(filename, cov_result)
 
             print('Executed class: ', self.get_method_or_class_name(self.class_definition_line, filename))
             print('Executed methods:')
@@ -68,24 +69,38 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 self.method_definition_lines.append(line_number)
 
+    def remove_not_executed_definitions(self, filename, cov_result):
         # Methods that weren't executed aren't relevant, so we remove them here.
         for line in self.method_definition_lines:
-            if not self.was_executed(line, cov_result):
-                self.method_definition_lines.remove(line)     
+            if not self.was_executed(line, filename, cov_result):
+                self.method_definition_lines.remove(line)
    
-    def was_executed(self, def_line, cov_result):
-        # We consider that the lines containing a method go from its definition
-        # until the definition of the next method. Blank lines are getting 
-        # considered this way, but they don't really interfere.
-        position = self.method_definition_lines.index(def_line)
-        try:
-            end_def = self.method_definition_lines[position + 1]
-        # If it's the last method definition, we consider its end as the end of
-        # the file.
-        except IndexError:
-            end_def = len(cov_result)
+    def was_executed(self, def_line, filename, cov_result):
+        # We go through the file from the line containing the method definition
+        # until its matching 'end' line. We need to keep track of the 'end'
+        # keyword appearing in other contexts, e.g. closing other blocks of code.
+        remaining_blocks = 1
+        current_line = def_line
 
-        for line in range(def_line, end_def - 1):
+        block_tokens = ['do', 'if', 'case', 'for', 'begin', 'while']
+
+        while remaining_blocks:
+            line = linecache.getline(filename, current_line)
+            tokens = line.split()
+            # If we have a line that requires a matching 'end', we increase the
+            # number of blocks.
+            if any(token in tokens for token in block_tokens):
+                remaining_blocks += 1
+            # Likewise, if we found an 'end', we decrease the number of blocks.
+            # When it gets to zero, that means we have reached the end of the
+            # method.
+            if 'end' in tokens:
+                remaining_blocks -= 1
+            current_line += 1
+
+        end_line = current_line - 1
+
+        for line in range(def_line, end_line):
             if cov_result[line]:
                 return True
         return False
