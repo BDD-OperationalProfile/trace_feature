@@ -12,18 +12,33 @@ class RubyExecution(BaseExecution):
     def check_gemfile(self, gemfile):
         output = []
         with open(gemfile, 'r+') as file:
+            has_simplecov = False
+            is_on_test = False
             for line in file:
-                output.append(line)
                 tokens = line.split()
                 if self.is_test_group(tokens):
-                    line = '  gem \'simplecov\', :require => false\n'
-                    output.append(line)
+                    is_on_test = True
+                if is_on_test:
+                    if not has_simplecov:
+                        has_simplecov = self.simplecov_exists(tokens)
+                    if tokens[0] == 'end':
+                        if not has_simplecov:
+                            simplecov_line = '  gem \'simplecov\', :require => false\n'
+                            output.append(simplecov_line)
+                        is_on_test = False
+                output.append(line)
             file.seek(0)
             file.writelines(output)
     
     def is_test_group(self, tokens):
         if len(tokens) > 1:
             if tokens[0] == 'group' and tokens[1] == ':test':
+                return True
+        return False
+
+    def simplecov_exists(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == 'gem' and tokens[1] == '\'simplecov\',':
                 return True
         return False
 
@@ -129,7 +144,3 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
-
-if  __name__ == "__main__":
-    a = RubyExecution()
-    a.execute('Gemfile')
