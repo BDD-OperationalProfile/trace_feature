@@ -1,17 +1,34 @@
 from trace_feature.core.base_execution import BaseExecution
+import os
 import linecache
 
 class RubyExecution(BaseExecution):
-    def __init__(self):
+    def __init__(self, path):
         self.class_definition_line = None
         self.method_definition_lines = []
+        self.path = path
+        self.gemfile = None
 
-    def execute(self, gemfile):
-        self.check_gemfile(gemfile)
+    def execute(self):
+        is_valid = self.is_a_rails_project()
+        if is_valid:
+            self.check_gemfile()
 
-    def check_gemfile(self, gemfile):
+    def is_a_rails_project(self):
+        for root, _, files in os.walk(self.path):
+            for filename in files:
+                if filename == 'Gemfile':
+                    try:
+                        open(os.path.join(self.path, filename))
+                    except IOError:
+                        return False
+                    else:
+                        self.gemfile = os.path.join(self.path, filename)
+                        return True
+
+    def check_gemfile(self):
         output = []
-        with open(gemfile, 'r+') as file:
+        with open(self.gemfile, 'r+') as file:
             has_simplecov = False
             is_on_test = False
             for line in file:
