@@ -1,6 +1,7 @@
 from trace_feature.core.base_execution import BaseExecution
 import os
 import linecache
+import subprocess
 
 class RubyExecution(BaseExecution):
     def __init__(self, path):
@@ -13,6 +14,7 @@ class RubyExecution(BaseExecution):
         is_valid = self.is_a_rails_project()
         if is_valid:
             self.check_gemfile()
+            subprocess.call(['bundle', 'install'], cwd=self.path)
 
     def is_a_rails_project(self):
         for root, _, files in os.walk(self.path):
