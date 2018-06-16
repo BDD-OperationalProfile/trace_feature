@@ -3,11 +3,26 @@ import linecache
 import subprocess
 import json
 
+from trace_feature.models.feature import Feature
+from trace_feature.models.method import Method
+from trace_feature.models.scenario_outline import ScenarioOutline
+from trace_feature.models.simple_scenario import SimpleScenario
+
+
+# import os,sys,inspect
+# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# model_dir = os.path.dirname(os.path.dirname(currentdir)) + '/models'
+# sys.path.insert(0, model_dir) 
+# print(currentdir)
+
+
 class RubyExecution(BaseExecution):
 
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
+        self.simple_scenario = SimpleScenario()
+        
 
     # this method will execute all the features at this project
     def execute(self):
@@ -47,10 +62,20 @@ class RubyExecution(BaseExecution):
             self.get_method_definition_lines(file, cov_result)
             self.remove_not_executed_definitions(filename, cov_result)
 
-            print('Executed class: ', self.get_method_or_class_name(self.class_definition_line, filename))
-            print('Executed methods:')
+
             for method in self.method_definition_lines:
-                print(self.get_method_or_class_name(method, filename))
+                new_method = Method()
+                new_method.method_name = self.get_method_or_class_name(method, filename)
+                new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
+                new_method.class_path = '/undefined'
+                self.simple_scenario.executed_methods.append(new_method)
+            
+            print(self.simple_scenario)
+
+                
+
+            
+
 
     def is_method(self, line):
         # We only want the first token in the line, to avoid false positives.
