@@ -10,6 +10,8 @@ class RubyExecution(BaseExecution):
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
+        self.simple_scenario = SimpleScenario()
+        
 
         self.feature = Feature()
         
