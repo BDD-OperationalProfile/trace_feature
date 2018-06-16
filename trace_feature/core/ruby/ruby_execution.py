@@ -1,7 +1,10 @@
 from trace_feature.core.base_execution import BaseExecution
 import linecache
+import subprocess
+import json
 
 class RubyExecution(BaseExecution):
+
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
@@ -19,17 +22,23 @@ class RubyExecution(BaseExecution):
     # scenario_ref: refer to the line or the name of a specific scenario
     def execute_scenario(self, feature_name, scenario_ref):
         # Vamos ter executar um cenario dentro do filename. O comando pra isso ta na issue. Executando isso,
-        # o arquivo resultset.json será criado. Ai vamos iterar sobre esse arquivo, a iteracao inicial nos da
+        # o arquivo resultset.json sera criado. Ai vamos iterar sobre esse arquivo, a iteracao inicial nos da
         # o nome dos arquivos tocados. Ai com isso, basta usarmos os metodos do felipe e sair instanciando as modelos
-        # com isso.. Depois que as modelos estiverem instanciadas, já era, so gerar o json da modelo Feature, que
+        # com isso.. Depois que as modelos estiverem instanciadas, ja era, so gerar o json da modelo Feature, que
         # vai trazer todas as modelos relacionadas com ela no json, e fim.
         #primeiro executamos o cenario..
-        if type(scenario_ref) == int:
-            subprocess.call(['rails', 'cucumber', feature_name + ':' + scenario_ref])
-        run_file(feature_name, 'coverage/cucumber/.resultset.json')
-        pass                
+        subprocess.call(['rails', 'cucumber', feature_name])
+
+        with open('coverage/cucumber/.resultset.json') as f:
+            json_data = json.load(f)
+            for k in json_data:
+                for i in json_data[k]['coverage']:
+                    json_data[k]['coverage'][i]
+                    self.run_file(i, json_data[k]['coverage'][i])
+
 
     def run_file(self, filename, cov_result):
+        self.method_definition_lines = []
         with open(filename) as file:
             if self.is_empty_class(file):
                 return
