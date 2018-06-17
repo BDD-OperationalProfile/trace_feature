@@ -21,10 +21,10 @@ class Scenario(ABC):
     # def line(self):
     #     raise NotImplementedError
 
-    # @abstractmethod
-    # def execute(self):
-    #     pass
+    @abstractmethod
+    def execute(self):
+        pass
 
-    # @abstractmethod
-    # def set_line(self):
-    #     pass
+    @abstractmethod
+    def set_line(self):
+        pass

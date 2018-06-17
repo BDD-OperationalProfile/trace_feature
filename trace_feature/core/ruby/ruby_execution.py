@@ -1,26 +1,17 @@
 from trace_feature.core.base_execution import BaseExecution
+from trace_feature.core.models import Feature, Method, ScenarioOutline, SimpleScenario
 import linecache
 import subprocess
 import json
 
-from trace_feature.models.feature import Feature
-from trace_feature.models.method import Method
-from trace_feature.models.scenario_outline import ScenarioOutline
-from trace_feature.models.simple_scenario import SimpleScenario
-
-
-# import os,sys,inspect
-# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-# model_dir = os.path.dirname(os.path.dirname(currentdir)) + '/models'
-# sys.path.insert(0, model_dir) 
-# print(currentdir)
-
 
 class RubyExecution(BaseExecution):
-
+ 
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
+
+        self.feature = Feature()
         self.simple_scenario = SimpleScenario()
         
 
@@ -43,6 +34,9 @@ class RubyExecution(BaseExecution):
         # vai trazer todas as modelos relacionadas com ela no json, e fim.
         #primeiro executamos o cenario..
         subprocess.call(['rails', 'cucumber', feature_name])
+
+
+        self.get_feature_information(feature_name) 
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -67,7 +61,7 @@ class RubyExecution(BaseExecution):
                 new_method = Method()
                 new_method.method_name = self.get_method_or_class_name(method, filename)
                 new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
-                new_method.class_path = '/undefined'
+                new_method.class_path = filename
                 self.simple_scenario.executed_methods.append(new_method)
             
             print(self.simple_scenario)
@@ -165,3 +159,44 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
+
+
+
+
+
+    def get_feature_information(self, file): 
+        print('\n\n\n\n Arquivo da Feature: ' + file)
+        
+        self.feature.language = "Ruby"
+        self.feature.path_name = file
+        self.get_feature_name(file)
+
+        self.get_feature_scenarios(file)
+
+
+
+        
+    
+    def get_feature_name(self, file):
+        with open(file) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "Funcionalidade: " in line:
+                    self.feature.feature_name = line.split("Funcionalidade: ",1)[1] 
+        return
+
+
+
+    def get_feature_scenarios(self, file):
+        with open(file) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                print(str(line_number) + ": " + line)
+
+                if "Cenario: " in line:
+                    print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
+                    new_scenario = SimpleScenario()
+                    new_scenario.scenario_title = line.split("Cenario: ",1)[1]
+                    self.feature.scenarios.append(new_scenario)
+        return
+
