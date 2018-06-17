@@ -1,7 +1,5 @@
-import ruby.test as test
+from .core.ruby.ruby_execution import RubyExecution
 
-def hello():
-    print("Hello, world")
-
-def trace_feature():
-        test.execute()
+def execute():
+    ex = RubyExecution()
+    ex.execute_scenario('/home/leticia/Documents/Desenho/trabalho2/myrottenpotatoes/features/adicionar_filme.feature', 10)
