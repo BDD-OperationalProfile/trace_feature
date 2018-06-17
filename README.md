@@ -13,30 +13,30 @@ Neste repositório se encontra a ferramenta de geração de _traces_ a partir da
 
 ##### **1. Instale o Pip**
 Para visualizar se você possui o pip instalado, use:
-```python
+```shell
 pip --version
 ```
 
 Caso não tenha o pip instalado, use:
-```python
+```shell
 sudo apt-get install python3-pip
 ```
 
 
 ##### **2. Instale o Virtualenv**
 Para visualizar se você possui o virtualenv instalado, use:
-```python
+```shell
 virtualenv --version
 ```
 
 Caso não tenha o pip instalado, use:   
-```python
+```shell
 sudo pip3 install virtualenv
 ```
 
 
 ##### **3. Crie um Virtualenv com Python3**
-```python
+```shell
 virtualenv -p python3 env
 ```
 
@@ -44,7 +44,7 @@ virtualenv -p python3 env
 ##### **4. Entre no Virtualenv**
 Entre na pasta que contém seu virtualenv e use:  
 
-```python 
+```shell 
 source env/bin/activate
 ```
 
@@ -52,13 +52,13 @@ source env/bin/activate
 
 Após criar um _virtualenv_, navegue até o diretório `trace_feature` e execute o seguinte comando:   
 
-```python
+```shell
 $ pip install .
 ```
 
 ### Navegue até o projeto que deseja analisar e execute:
+> $ python 
 ```python
-$ python 
 > import trace_feature as t
 > t.trace_feature()
 ```

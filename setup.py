@@ -7,5 +7,5 @@ setup(name='trace_feature',
       author='Rafael Fazzolino',
       author_email='fazzolino29@gmail.com',
       license='MIT',
-      packages=['trace_feature'],
+      packages=['trace_feature', 'trace_feature.core', 'trace_feature.core.ruby'],
       zip_safe=False)
