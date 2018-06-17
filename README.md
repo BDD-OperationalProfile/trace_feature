@@ -56,12 +56,21 @@ Após criar um _virtualenv_, navegue até o diretório `trace_feature` e execute
 $ pip install .
 ```
 
-### Navegue até o projeto que deseja analisar e execute:
-> $ python 
-```python
-> import trace_feature as t
-> t.trace_feature()
+### Execução do projeto:
+Para executar o projeto, use o comando:
+
+```shell
+trace-feature -p [nome do projeto] -f [nome da feature] -s [nome do cenário]
 ```
+
+Os argumentos são opcionais e não precisam ser especificados depois do comando. Vale lembrar também que para que o comando seja executado sem parâmetros, é necessário navegar até a pasta do projeto onde se deseja executar a ferramenta.
+
+Para obter ajuda sobre o comando e os argumentos, basta usar
+
+```shell
+trace-feature --help
+```
+
 
 ---
 Para efeitos de teste, foi disponibilizado um projeto _rails_, que pode ser acessado no seguinte link: 

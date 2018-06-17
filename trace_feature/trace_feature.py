@@ -5,10 +5,12 @@ from trace_feature.core.ruby.ruby_execution import RubyExecution
 @click.command()
 @click.option('--scenario', '-s', default=0, help='This is the scenario\'s correponding line that can be found at the feature file.')
 @click.option('--feature', '-f', default='', help='This is the file\'s name where the feature is.')
-@click.option('--project', '-p', default='.', help='This is the name of the project to be analyzed.')
+@click.option('--project', '-p', default='.', help='This is the name of the project to be analyzed. Default: current folder.')
 def trace(project, feature, scenario):
     """
         This command ables you to run the traces generator's tool by running every BDD feature.
+        
+        None of the arguments are required.
     """
 
     # language = find_language(path)
