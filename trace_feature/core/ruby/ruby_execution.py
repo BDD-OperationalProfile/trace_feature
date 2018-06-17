@@ -2,6 +2,7 @@ from trace_feature.core.base_execution import BaseExecution
 import os
 import linecache
 import subprocess
+import json
 
 class RubyExecution(BaseExecution):
     def __init__(self, path):
@@ -11,6 +12,7 @@ class RubyExecution(BaseExecution):
         self.gemfile = None
         self.env = None
 
+    # this method will execute all the features at this project
     def execute(self):
         is_valid = self.is_a_rails_project()
         if is_valid:
@@ -92,11 +94,36 @@ class RubyExecution(BaseExecution):
                 return True
         return False
 
+    # this method will execute only a specific feature
+    def execute_feature(self, feature_name):
+        pass
+
+    # this method will execute a specific scenario into a specific feature
+    # filename: refer to the .feature file
+    # scenario_ref: refer to the line or the name of a specific scenario
+    def execute_scenario(self, feature_name, scenario_ref):
+        # Vamos ter executar um cenario dentro do filename. O comando pra isso ta na issue. Executando isso,
+        # o arquivo resultset.json sera criado. Ai vamos iterar sobre esse arquivo, a iteracao inicial nos da
+        # o nome dos arquivos tocados. Ai com isso, basta usarmos os metodos do felipe e sair instanciando as modelos
+        # com isso.. Depois que as modelos estiverem instanciadas, ja era, so gerar o json da modelo Feature, que
+        # vai trazer todas as modelos relacionadas com ela no json, e fim.
+        #primeiro executamos o cenario..
+        subprocess.call(['rails', 'cucumber', feature_name])
+
+        with open('coverage/cucumber/.resultset.json') as f:
+            json_data = json.load(f)
+            for k in json_data:
+                for i in json_data[k]['coverage']:
+                    json_data[k]['coverage'][i]
+                    self.run_file(i, json_data[k]['coverage'][i])
+
+
     def run_file(self, filename, cov_result):
+        self.method_definition_lines = []
         with open(filename) as file:
             if self.is_empty_class(file):
                 return
-            
+
             self.get_class_definition_line(file)
             self.get_method_definition_lines(file, cov_result)
             self.remove_not_executed_definitions(filename, cov_result)
@@ -124,7 +151,7 @@ class RubyExecution(BaseExecution):
             return first_token == 'class'
         return False
 
-    def get_method_or_class_name(self, line_number, filename):      
+    def get_method_or_class_name(self, line_number, filename):
         line = linecache.getline(filename, line_number)
 
         # The method or class name is always going to be the second token
@@ -133,7 +160,7 @@ class RubyExecution(BaseExecution):
 
         # If the method definition contains parameters, part of it will also
         # be in the token though. For example:
-        #    def foo(x, y) 
+        #    def foo(x, y)
         # would become 'foo(x,'. We then separate those parts.
         name, parenthesis, rest = name_token.partition('(')
 
@@ -157,7 +184,7 @@ class RubyExecution(BaseExecution):
         for line in self.method_definition_lines:
             if not self.was_executed(line, filename, cov_result):
                 self.method_definition_lines.remove(line)
-   
+
     def was_executed(self, def_line, filename, cov_result):
         # We go through the file from the line containing the method definition
         # until its matching 'end' line. We need to keep track of the 'end'
@@ -194,4 +221,3 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
-    
