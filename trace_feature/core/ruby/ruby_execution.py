@@ -8,91 +8,10 @@ class RubyExecution(BaseExecution):
     def __init__(self, path):
         self.class_definition_line = None
         self.method_definition_lines = []
-        self.path = path
-        self.gemfile = None
-        self.env = None
 
     # this method will execute all the features at this project
     def execute(self):
-        is_valid = self.is_a_rails_project()
-        if is_valid:
-            self.check_gemfile()
-            subprocess.call(['bundle', 'install'], cwd=self.path)
-
-    def is_a_rails_project(self):
-        for root, _, files in os.walk(self.path):
-            for filename in files:
-                if filename == 'Gemfile':
-                    try:
-                        open(os.path.join(self.path, filename))
-                    except IOError:
-                        return False
-                    else:
-                        self.gemfile = os.path.join(self.path, filename)
-                        return True
-                if filename == 'env.rb':
-                    try:
-                        open(os.path.join(self.path, filename))
-                    except IOError:
-                        return False
-                    else:
-                        self.env = os.path.join(self.path, filename)
-                        self.check_environment()
-                        return True
-
-    def check_gemfile(self):
-        output = []
-        with open(self.gemfile, 'r+') as file:
-            has_simplecov = False
-            is_on_test = False
-            for line in file:
-                tokens = line.split()
-                if self.is_test_group(tokens):
-                    is_on_test = True
-                if is_on_test:
-                    if not has_simplecov:
-                        has_simplecov = self.simplecov_exists(tokens)
-                    if tokens[0] == 'end':
-                        if not has_simplecov:
-                            simplecov_line = '  gem \'simplecov\', :require => false\n'
-                            output.append(simplecov_line)
-                        is_on_test = False
-                output.append(line)
-            file.seek(0)
-            file.writelines(output)
-
-    def check_environment(self):
-        output = []
-        with open(self.env, 'r+') as file:
-            has_gem = False
-            for line in file:
-                tokens = line.split()
-                if self.is_gem_instantiated(tokens):
-                    has_gem = True
-                output.append(line)
-            if not has_gem:
-                simplecov_line = ' SimpleCov.start \'rails\'\n'
-                output.insert(1, simplecov_line)
-            file.seek(0)
-            file.writelines(output)
-    
-    def is_gem_instantiated(self, tokens):
-        if len(tokens) > 1:
-            if tokens[0] == 'SimpleCov.start' and tokens[1] == '\'rails\'':
-                return True
-        return False
-
-    def is_test_group(self, tokens):
-        if len(tokens) > 1:
-            if tokens[0] == 'group' and tokens[1] == ':test':
-                return True
-        return False
-
-    def simplecov_exists(self, tokens):
-        if len(tokens) > 1:
-            if tokens[0] == 'gem' and tokens[1] == '\'simplecov\',':
-                return True
-        return False
+        pass
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
