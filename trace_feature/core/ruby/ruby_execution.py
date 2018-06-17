@@ -9,6 +9,7 @@ class RubyExecution(BaseExecution):
         self.method_definition_lines = []
         self.path = path
         self.gemfile = None
+        self.env = None
 
     def execute(self):
         is_valid = self.is_a_rails_project()
@@ -26,6 +27,15 @@ class RubyExecution(BaseExecution):
                         return False
                     else:
                         self.gemfile = os.path.join(self.path, filename)
+                        return True
+                if filename == 'env.rb':
+                    try:
+                        open(os.path.join(self.path, filename))
+                    except IOError:
+                        return False
+                    else:
+                        self.env = os.path.join(self.path, filename)
+                        self.check_environment()
                         return True
 
     def check_gemfile(self):
@@ -48,7 +58,28 @@ class RubyExecution(BaseExecution):
                 output.append(line)
             file.seek(0)
             file.writelines(output)
+
+    def check_environment(self):
+        output = []
+        with open(self.env, 'r+') as file:
+            has_gem = False
+            for line in file:
+                tokens = line.split()
+                if self.is_gem_instantiated(tokens):
+                    has_gem = True
+                output.append(line)
+            if not has_gem:
+                simplecov_line = ' SimpleCov.start \'rails\'\n'
+                output.insert(1, simplecov_line)
+            file.seek(0)
+            file.writelines(output)
     
+    def is_gem_instantiated(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == 'SimpleCov.start' and tokens[1] == '\'rails\'':
+                return True
+        return False
+
     def is_test_group(self, tokens):
         if len(tokens) > 1:
             if tokens[0] == 'group' and tokens[1] == ':test':
@@ -163,3 +194,4 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
+    
