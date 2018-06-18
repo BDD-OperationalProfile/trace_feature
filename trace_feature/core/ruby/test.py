@@ -42,8 +42,10 @@ def include_requirements():
     pass
 
 def execute_feature(path):
-    subprocess.call(['cucumber', 'features/adicionar_filme.feature'])
-
+    feature_path = path + '/features/adicionar_filme.feature'
+    print(feature_path)
+    subprocess.call(['rails', 'cucumber', feature_path])
+    print("AQUI FOI EM ")
     with open('coverage/cucumber/.resultset.json') as f:
         json_data = json.load(f)
         files = []
@@ -98,9 +100,9 @@ def get_local_path():
     pathname = os.path.dirname(sys.argv[0])
     return os.path.abspath(pathname)
 
+def execute():
+    path = get_local_path()
 
-path = get_local_path()
-
-if is_rails_project(path) and verify_requirements(path):
-    print('Este e um projeto rails!')
-    execute_feature(path)
+    if is_rails_project(path) and verify_requirements(path):
+        print('Este e um projeto rails!')
+        execute_feature(path)
