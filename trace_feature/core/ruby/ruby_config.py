@@ -29,8 +29,8 @@ class RubyConfig(BaseConfig):
 
     # Adaptar de acordo com o que for feito com o @click
     def get_local_path(self):
-        pathname = os.path.dirname(sys.argv[0])
-        return os.path.abspath(pathname)
+        # pathname = os.path.dirname(sys.argv[0])
+        return '.'
 
     def verify_requirements(self, path):
         SIMPLECOV = '  gem \'simplecov-json\'\n'
@@ -117,7 +117,7 @@ class RubyConfig(BaseConfig):
 
             file.seek(0)
             file.writelines(output)
-    
+
     def req_simple_cov(self, tokens):
         if len(tokens) > 1:
             if tokens[0] == ' require' and tokens[1] == '\'simplecov-json\'':

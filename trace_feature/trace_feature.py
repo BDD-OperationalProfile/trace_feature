@@ -1,6 +1,7 @@
 import click
 import os
 from trace_feature.core.ruby.ruby_execution import RubyExecution
+from trace_feature.core.ruby.ruby_config import RubyConfig
 
 @click.command()
 @click.option('--scenario', '-s', default=0, help='This is the scenario\'s correponding line that can be found at the feature file.')
@@ -9,7 +10,7 @@ from trace_feature.core.ruby.ruby_execution import RubyExecution
 def trace(project, feature, scenario):
     """
         This command ables you to run the traces generator's tool by running every BDD feature.
-        
+
         None of the arguments are required.
     """
 
@@ -17,10 +18,11 @@ def trace(project, feature, scenario):
     language = 'Ruby'
     if(language == 'Ruby'):
         # config = RubyConfig()
-        execution = RubyExecution()  
-    # elif(language == 'Python'):
-        # config = PythonConfig()
-        # execution = PythonExecution()
+        execution = RubyExecution()
+        config = RubyConfig()
+        if config.config() == False:
+            print('Erro!')
+            exit()
 
     # Where the function config_project has to be
 
@@ -38,4 +40,3 @@ def trace(project, feature, scenario):
         execution.execute_scenario(feature_name, scenario)
     elif (feature == '' and scenario != 0):
         click.echo('Must define a feature to specify a scenario.')
-    
