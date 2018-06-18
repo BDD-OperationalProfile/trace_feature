@@ -2,6 +2,7 @@ from trace_feature.core.base_config import BaseConfig
 import os
 import sys
 import re
+import subprocess
 
 class RubyConfig(BaseConfig):
     def __init__(self):
@@ -14,6 +15,7 @@ class RubyConfig(BaseConfig):
                 return True
             else:
                 self.check_gemfile(self.get_local_path())
+                subprocess.call(['bundle', 'install'], cwd=self.get_local_path())
         else:
             return false
 
