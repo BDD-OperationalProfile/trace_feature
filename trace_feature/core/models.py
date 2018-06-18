@@ -10,20 +10,16 @@ class Feature:
         self.user_story = "" 
         self.background = None
 
-
-
-
-
-class Method:
-
-    def __init__(self):
-        self.method_name = ""
-        self.class_name = ""
-        self.class_path = ""
-
-
     def __str__(self):
-        return "\t" + self.method_name + " (" + self.class_name + "):  " + self.class_path  
+        print("FEATURE:")
+        print("\t path: " + self.path_name)
+        print("\t name: " + self.feature_name)
+        print("\t language: " + self.language + '\n')
+        
+        for scenario in self.scenarios:
+            print(scenario)
+            
+        return '\n'
 
 
 
@@ -75,14 +71,19 @@ class SimpleScenario(Scenario):
 
 
     def __str__(self):
-        print("\n Title: " + self.scenario_title)
-        self.print_methods()
-        return "\n"
+        print("SCENARIO:")
+        print("\t title: " + self.scenario_title)
+        print("\t line: " + str(self.line))
+        print("\t steps: ")
 
-    def print_methods(self):
+        for step in self.steps:
+            print("\t\t" + step)
+        
         for method in self.executed_methods:
             print(method)
-
+            
+        return '\n'
+        
 
 
 
@@ -112,3 +113,19 @@ class ScenarioOutline(Scenario):
         pass
 
 
+
+
+class Method:
+    
+    def __init__(self):
+        self.method_name = ""
+        self.class_name = ""
+        self.class_path = ""
+
+
+    def __str__(self):
+        print("METHOD:")
+        print("\t name: " + self.method_name)
+        print("\t language: " + self.class_name)
+        print("\t path: " + self.class_path)
+        return '\n'

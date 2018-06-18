@@ -37,6 +37,7 @@ class RubyExecution(BaseExecution):
 
 
         self.get_feature_information(feature_name) 
+        print(self.feature)
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -64,7 +65,7 @@ class RubyExecution(BaseExecution):
                 new_method.class_path = filename
                 self.simple_scenario.executed_methods.append(new_method)
             
-            print(self.simple_scenario)
+            # print(self.simple_scenario)
 
                 
 
@@ -164,21 +165,21 @@ class RubyExecution(BaseExecution):
 
 
 
-    def get_feature_information(self, file): 
-        print('\n\n\n\n Arquivo da Feature: ' + file)
+    def get_feature_information(self, path): 
+        print('\n\n\n\n Arquivo da Feature: ' + path)
         
-        self.feature.language = "Ruby"
-        self.feature.path_name = file
-        self.get_feature_name(file)
+        self.get_language(path)
+        self.feature.path_name = path
+        self.get_feature_name(path)
 
-        self.get_feature_scenarios(file)
-
+        self.get_scenarios(path)
+        self.get_steps(path)
 
 
         
     
-    def get_feature_name(self, file):
-        with open(file) as file:
+    def get_feature_name(self, path):
+        with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
                 if "Funcionalidade: " in line:
@@ -187,16 +188,42 @@ class RubyExecution(BaseExecution):
 
 
 
-    def get_feature_scenarios(self, file):
-        with open(file) as file:
+    def get_scenarios(self, path):
+        with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
-                print(str(line_number) + ": " + line)
-
                 if "Cenario: " in line:
-                    print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
+                    # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
                     new_scenario = SimpleScenario()
                     new_scenario.scenario_title = line.split("Cenario: ",1)[1]
+                    new_scenario.line = line_number
                     self.feature.scenarios.append(new_scenario)
+                    
         return
 
+
+    def get_steps(self, path):
+        qt_scenarios = len(self.feature.scenarios)
+        key_words = ["Quando ", "E ", "Dado ", "Entao "]
+        current_scenario = 0
+
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if any(word in line for word in key_words):
+                    self.feature.scenarios[current_scenario].steps.append(line)
+                    
+                    if "Entao " in line:
+                        current_scenario+=1
+                    
+        return
+
+
+    def get_language(self, path):
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "#language:" in line:
+                    self.feature.language = line.split("#language:",1)[1]
+
+        return
