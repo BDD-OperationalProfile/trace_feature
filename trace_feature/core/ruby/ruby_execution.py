@@ -6,13 +6,13 @@ import json
 
 
 class RubyExecution(BaseExecution):
- 
+
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
 
         self.feature = Feature()
-        
+
 
     # this method will execute all the features at this project
     def execute(self):
@@ -26,17 +26,11 @@ class RubyExecution(BaseExecution):
     # filename: refer to the .feature file
     # scenario_ref: refer to the line or the name of a specific scenario
     def execute_scenario(self, feature_name, scenario_ref):
-        # Vamos ter executar um cenario dentro do filename. O comando pra isso ta na issue. Executando isso,
-        # o arquivo resultset.json sera criado. Ai vamos iterar sobre esse arquivo, a iteracao inicial nos da
-        # o nome dos arquivos tocados. Ai com isso, basta usarmos os metodos do felipe e sair instanciando as modelos
-        # com isso.. Depois que as modelos estiverem instanciadas, ja era, so gerar o json da modelo Feature, que
-        # vai trazer todas as modelos relacionadas com ela no json, e fim.
-        #primeiro executamos o cenario..
         subprocess.call(['rails', 'cucumber', feature_name])
 
 
-        self.get_feature_information(feature_name) 
-        
+        self.get_feature_information(feature_name)
+
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -45,15 +39,11 @@ class RubyExecution(BaseExecution):
                     json_data[k]['coverage'][i]
                     self.run_file(i, json_data[k]['coverage'][i])
 
-
-
-        print('\n\n\n\n')
-        print(self.feature)
-        print('\n\n\n\n')
-
         self.export_json()
 
-
+    # This method will execute a specific feature file
+    # filename:  the  name of the feature file
+    # cov_result: a array containing the result os simpleCov for some method
     def run_file(self, filename, cov_result):
         self.method_definition_lines = []
         with open(filename) as file:
@@ -72,9 +62,9 @@ class RubyExecution(BaseExecution):
                 new_method.class_path = filename
                 self.feature.scenarios[0].executed_methods.append(new_method)
 
-                
 
-            
+
+
 
 
     def is_method(self, line):
@@ -167,29 +157,22 @@ class RubyExecution(BaseExecution):
         return True
 
 
+    def get_feature_information(self, path):
 
-
-
-    def get_feature_information(self, path): 
-        
         self.get_language(path)
         self.feature.path_name = path
         self.get_feature_name(path)
-
         self.get_scenarios(path)
         self.get_steps(path)
 
 
-        
-    
     def get_feature_name(self, path):
         with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
                 if "Funcionalidade: " in line:
-                    self.feature.feature_name = line.split("Funcionalidade: ",1)[1] 
+                    self.feature.feature_name = line.split("Funcionalidade: ",1)[1].replace('\n', '')
         return
-
 
 
     def get_scenarios(self, path):
@@ -199,10 +182,9 @@ class RubyExecution(BaseExecution):
                 if "Cenario: " in line:
                     # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
                     new_scenario = SimpleScenario()
-                    new_scenario.scenario_title = line.split("Cenario: ",1)[1]
+                    new_scenario.scenario_title = line.split("Cenario: ",1)[1].replace('\n', '')
                     new_scenario.line = line_number
                     self.feature.scenarios.append(new_scenario)
-                    
         return
 
 
@@ -215,11 +197,10 @@ class RubyExecution(BaseExecution):
             file.seek(0)
             for line_number, line in enumerate(file, 1):
                 if any(word in line for word in key_words):
-                    self.feature.scenarios[current_scenario].steps.append(line)
-                    
+                    self.feature.scenarios[current_scenario].steps.append(line.replace('\n', ''))
+
                     if "Entao " in line:
                         current_scenario+=1
-                    
         return
 
 
@@ -228,12 +209,10 @@ class RubyExecution(BaseExecution):
             file.seek(0)
             for line_number, line in enumerate(file, 1):
                 if "#language:" in line:
-                    self.feature.language = line.split("#language:",1)[1]
-
+                    self.feature.language = line.split("#language:",1)[1].replace('\n', '')
         return
 
 
-
-    def export_json(self):        
-        file = open('result.json', 'w')
+    def export_json(self):
+        file = open(self.feature.feature_name + '_result.json', 'w')
         file.write(self.feature.toJSON())

@@ -60,7 +60,7 @@ $ pip install .
 Para executar o projeto, use o comando:
 
 ```shell
-trace-feature -p [nome do projeto] -f [nome da feature] -s [nome do cenário]
+trace-feature -f [feature] -s [linha do cenário]
 ```
 
 Os argumentos são opcionais e não precisam ser especificados depois do comando. Vale lembrar também que para que o comando seja executado sem parâmetros, é necessário navegar até a pasta do projeto onde se deseja executar a ferramenta.

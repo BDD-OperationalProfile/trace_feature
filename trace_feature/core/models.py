@@ -9,22 +9,22 @@ class Feature:
         self.feature_name = ""
         self.scenarios = []
         self.language = ""
-        self.user_story = "" 
+        self.user_story = ""
         self.background = None
 
     def __str__(self):
         print("FEATURE:")
         print("\t path: " + self.path_name)
         print("\t name: " + self.feature_name)
-        print("\t language: " + self.language + '\n')
-        
+        print("\t language: " + self.language)
+
         for scenario in self.scenarios:
             print(scenario)
-            
-        return '\n'
+
+        return ''
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
+        return json.dumps(self, default=lambda o: o.__dict__,
             sort_keys=True, indent=4)
 
 
@@ -41,7 +41,7 @@ class Scenario(ABC):
     # @property
     # def steps(self):
     #     raise NotImplementedError
-    
+
     # @property
     # def scenario_title(self):
     #     raise NotImplementedError
@@ -84,12 +84,12 @@ class SimpleScenario(Scenario):
 
         for step in self.steps:
             print("\t\t" + step)
-        
+
         for method in self.executed_methods:
             print(method)
-            
-        return '\n'
-        
+
+        return ''
+
 
 
 
@@ -122,7 +122,7 @@ class ScenarioOutline(Scenario):
 
 
 class Method:
-    
+
     def __init__(self):
         self.method_name = ""
         self.class_name = ""
@@ -134,5 +134,4 @@ class Method:
         print("\t name: " + self.method_name)
         print("\t classe: " + self.class_name)
         print("\t path: " + self.class_path)
-        return '\n'
-        
+        return ''

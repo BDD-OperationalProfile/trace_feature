@@ -18,10 +18,8 @@ class SimpleScenario(Scenario):
     def __str__(self):
         print("\n Title: " + self.scenario_title)
         self.print_methods()
-        return "\n"
+        return ""
 
     def print_methods(self):
         for method in self.executed_methods:
             print(method)
-
-        
