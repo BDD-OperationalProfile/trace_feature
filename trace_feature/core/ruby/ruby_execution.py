@@ -1,13 +1,18 @@
 from trace_feature.core.base_execution import BaseExecution
+from trace_feature.core.models import Feature, Method, ScenarioOutline, SimpleScenario
 import linecache
 import subprocess
 import json
 
-class RubyExecution(BaseExecution):
 
+class RubyExecution(BaseExecution):
+ 
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
+
+        self.feature = Feature()
+        
 
     # this method will execute all the features at this project
     def execute(self):
@@ -29,12 +34,24 @@ class RubyExecution(BaseExecution):
         #primeiro executamos o cenario..
         subprocess.call(['rails', 'cucumber', feature_name])
 
+
+        self.get_feature_information(feature_name) 
+        
+
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
             for k in json_data:
                 for i in json_data[k]['coverage']:
                     json_data[k]['coverage'][i]
                     self.run_file(i, json_data[k]['coverage'][i])
+
+
+
+        print('\n\n\n\n')
+        print(self.feature)
+        print('\n\n\n\n')
+
+        self.export_json()
 
 
     def run_file(self, filename, cov_result):
@@ -47,10 +64,18 @@ class RubyExecution(BaseExecution):
             self.get_method_definition_lines(file, cov_result)
             self.remove_not_executed_definitions(filename, cov_result)
 
-            print('Executed class: ', self.get_method_or_class_name(self.class_definition_line, filename))
-            print('Executed methods:')
+
             for method in self.method_definition_lines:
-                print(self.get_method_or_class_name(method, filename))
+                new_method = Method()
+                new_method.method_name = self.get_method_or_class_name(method, filename)
+                new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
+                new_method.class_path = filename
+                self.feature.scenarios[0].executed_methods.append(new_method)
+
+                
+
+            
+
 
     def is_method(self, line):
         # We only want the first token in the line, to avoid false positives.
@@ -140,3 +165,75 @@ class RubyExecution(BaseExecution):
             if self.is_method(line):
                 return False
         return True
+
+
+
+
+
+    def get_feature_information(self, path): 
+        
+        self.get_language(path)
+        self.feature.path_name = path
+        self.get_feature_name(path)
+
+        self.get_scenarios(path)
+        self.get_steps(path)
+
+
+        
+    
+    def get_feature_name(self, path):
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "Funcionalidade: " in line:
+                    self.feature.feature_name = line.split("Funcionalidade: ",1)[1] 
+        return
+
+
+
+    def get_scenarios(self, path):
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "Cenario: " in line:
+                    # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
+                    new_scenario = SimpleScenario()
+                    new_scenario.scenario_title = line.split("Cenario: ",1)[1]
+                    new_scenario.line = line_number
+                    self.feature.scenarios.append(new_scenario)
+                    
+        return
+
+
+    def get_steps(self, path):
+        qt_scenarios = len(self.feature.scenarios)
+        key_words = ["Quando ", "E ", "Dado ", "Entao "]
+        current_scenario = 0
+
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if any(word in line for word in key_words):
+                    self.feature.scenarios[current_scenario].steps.append(line)
+                    
+                    if "Entao " in line:
+                        current_scenario+=1
+                    
+        return
+
+
+    def get_language(self, path):
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "#language:" in line:
+                    self.feature.language = line.split("#language:",1)[1]
+
+        return
+
+
+
+    def export_json(self):        
+        file = open('result.json', 'w')
+        file.write(self.feature.toJSON())

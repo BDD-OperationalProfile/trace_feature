@@ -1,4 +1,4 @@
-import Scenario
+from trace_feature.models.scenario import Scenario
 
 class SimpleScenario(Scenario):
 
@@ -13,3 +13,15 @@ class SimpleScenario(Scenario):
 
     def set_line(self):
         pass
+
+
+    def __str__(self):
+        print("\n Title: " + self.scenario_title)
+        self.print_methods()
+        return "\n"
+
+    def print_methods(self):
+        for method in self.executed_methods:
+            print(method)
+
+        
