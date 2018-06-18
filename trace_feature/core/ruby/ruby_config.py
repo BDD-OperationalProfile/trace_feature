@@ -5,17 +5,16 @@ import re
 import subprocess
 
 class RubyConfig(BaseConfig):
-    def __init__(self):
-        pass
+    def __init__(self, path):
+        self.path = path
 
     def config(self):
-        if self.is_rails_project(self.get_local_path()):
+        if self.is_rails_project(self.path):
             print('Rails project!')
-            self.verify_requirements(self.get_local_path()):
+            self.verify_requirements(self.path)
             subprocess.call(['bundle', 'install'], cwd=self.path)
         else:
             return False
-
 
     def is_rails_project(self, path):
         for root, _, files in os.walk(path):
@@ -28,12 +27,6 @@ class RubyConfig(BaseConfig):
                     else:
                         self.gemfile = os.path.join(path, filename)
                         return True
-
-    # Adaptar de acordo com o que for feito com o @click
-    def get_local_path(self):
-        pathname = os.path.dirname(sys.argv[0])
-        return os.path.abspath(pathname)
-
 
     def verify_requirements(self, path):
         self.check_gemfile(path)
@@ -74,7 +67,7 @@ class RubyConfig(BaseConfig):
 
     def check_environment(self, path):
         output = []
-        with open(path + '/env.rb', 'r+') as file:
+        with open(path + '/features/support/env.rb', 'r+') as file:
             has_gem = False
             for line in file:
                 tokens = line.split()

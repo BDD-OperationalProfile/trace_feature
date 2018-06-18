@@ -1,7 +1,6 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
-class BaseExecution(object):
-    __metaclass__ = ABCMeta
+class BaseExecution(ABC):
     @abstractmethod
     def execute(self):
         pass
