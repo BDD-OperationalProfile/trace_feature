@@ -18,7 +18,7 @@ class RubyConfig(BaseConfig):
                 print('Set requirements')
                 # INCLUIR REQUISITOS AQUI e rodar o bundle
         else:
-            return false
+            return False
 
 
     def is_rails_project(self, path):

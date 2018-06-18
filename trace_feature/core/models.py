@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import json
+
 
 class Feature:
 
@@ -20,6 +22,10 @@ class Feature:
             print(scenario)
             
         return '\n'
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 
 
@@ -126,6 +132,6 @@ class Method:
     def __str__(self):
         print("METHOD:")
         print("\t name: " + self.method_name)
-        print("\t language: " + self.class_name)
+        print("\t classe: " + self.class_name)
         print("\t path: " + self.class_path)
         return '\n'

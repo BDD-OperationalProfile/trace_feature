@@ -12,7 +12,6 @@ class RubyExecution(BaseExecution):
         self.method_definition_lines = []
 
         self.feature = Feature()
-        self.simple_scenario = SimpleScenario()
         
 
     # this method will execute all the features at this project
@@ -37,7 +36,7 @@ class RubyExecution(BaseExecution):
 
 
         self.get_feature_information(feature_name) 
-        print(self.feature)
+        
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -45,6 +44,14 @@ class RubyExecution(BaseExecution):
                 for i in json_data[k]['coverage']:
                     json_data[k]['coverage'][i]
                     self.run_file(i, json_data[k]['coverage'][i])
+
+
+
+        print('\n\n\n\n')
+        print(self.feature)
+        print('\n\n\n\n')
+
+        self.export_json()
 
 
     def run_file(self, filename, cov_result):
@@ -63,9 +70,7 @@ class RubyExecution(BaseExecution):
                 new_method.method_name = self.get_method_or_class_name(method, filename)
                 new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
                 new_method.class_path = filename
-                self.simple_scenario.executed_methods.append(new_method)
-            
-            # print(self.simple_scenario)
+                self.feature.scenarios[0].executed_methods.append(new_method)
 
                 
 
@@ -166,7 +171,6 @@ class RubyExecution(BaseExecution):
 
 
     def get_feature_information(self, path): 
-        print('\n\n\n\n Arquivo da Feature: ' + path)
         
         self.get_language(path)
         self.feature.path_name = path
@@ -227,3 +231,9 @@ class RubyExecution(BaseExecution):
                     self.feature.language = line.split("#language:",1)[1]
 
         return
+
+
+
+    def export_json(self):        
+        file = open('result.json', 'w')
+        file.write(self.feature.toJSON())
