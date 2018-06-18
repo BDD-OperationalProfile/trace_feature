@@ -1,4 +1,4 @@
-import Scenario
+from trace_feature.models.scenario import Scenario
 
 class ScenarioOutline(Scenario):
 

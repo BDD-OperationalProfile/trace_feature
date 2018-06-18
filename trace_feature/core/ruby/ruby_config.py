@@ -18,7 +18,7 @@ class RubyConfig(BaseConfig):
                 subprocess.call(['bundle', 'install'], cwd=self.get_local_path())
                 self.check_environment(self.get_local_path())
         else:
-            return false
+            return False
 
 
     def is_rails_project(self, path):
