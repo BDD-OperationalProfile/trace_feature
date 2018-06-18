@@ -16,6 +16,7 @@ class RubyConfig(BaseConfig):
             else:
                 self.check_gemfile(self.get_local_path())
                 subprocess.call(['bundle', 'install'], cwd=self.get_local_path())
+                self.check_environment(self.get_local_path())
         else:
             return false
 
@@ -82,5 +83,55 @@ class RubyConfig(BaseConfig):
     def simplecov_exists(self, tokens):
         if len(tokens) > 1:
             if tokens[0] == 'gem' and tokens[1] == '\'simplecov-json\'':
+                return True
+        return False
+
+    def check_environment(self, path):
+        REQSIMCOV = ' require \'simplecov-json\'\n'
+        START = ' SimpleCov.start \'rails\'\n'
+        RESULT_DIR = ' SimpleCov.coverage_dir \'coverage/cucumber\'\n'
+        output = []
+        with open(path + '/features/support/env.rb', 'r+') as file:
+            has_req = False
+            has_start = False
+            has_result_dir = False
+
+            for line in file:
+                tokens = line.split()
+                if self.req_simple_cov(tokens):
+                    has_req = True
+                if self.simple_cov_start(tokens):
+                    has_start = True
+                if self.result_dir(tokens):
+                    has_result_dir = True
+                output.append(line)
+            if not has_req:
+                has_req_line = REQSIMCOV
+                output.insert(6, has_req_line)
+            if not has_start:
+                has_start_line = START
+                output.insert(7, has_start_line)
+            if not has_result_dir:
+                has_result_line = RESULT_DIR
+                output.insert(8, has_result_line)
+
+            file.seek(0)
+            file.writelines(output)
+    
+    def req_simple_cov(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == ' require' and tokens[1] == '\'simplecov-json\'':
+                return True
+        return False
+
+    def simple_cov_start(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == ' SimpleCov.start' and tokens[1] == '\'rails\'':
+                return True
+        return False
+
+    def result_dir(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == ' SimpleCov.coverage_dir and tokens[1] == \'coverage/cucumber\'':
                 return True
         return False
