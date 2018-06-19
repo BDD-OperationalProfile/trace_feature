@@ -6,6 +6,7 @@
 
 
 Neste repositório se encontra a ferramenta de geração de _traces_ a partir da execução de cada feature BDD. 
+O link para acesso das documetações se encontra *[aqui](https://trace-features-bdd.github.io/trace_feature_docs/)*.
 
 ## Instalação
 
@@ -71,6 +72,4 @@ Para obter ajuda sobre o comando e os argumentos, basta usar
 trace-feature --help
 ```
 
-
----
-Para efeitos de teste, foi disponibilizado um projeto _rails_, que pode ser acessado no seguinte link: 
+Nossa biblioteca, por se tratar de um projeto de contribuição, iniciou-se, em seu controle de versão, a partir de um fork realizado do projeto já existente, a versão inicial da biblioteca, pode ser encontrada *[aqui](https://github.com/BDD-OperationalProfile/trace_feature)*.
