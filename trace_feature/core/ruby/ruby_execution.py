@@ -82,6 +82,10 @@ class RubyExecution(BaseExecution):
         return False
 
     def is_class(self, line):
+        """Verify if this line is a class definition.
+        :param line: Line content.
+        :return: true if is a class, false if not.
+        """
         # We only want the first token in the line, to avoid false positives.
         # That is, the word 'class' appearing in some other context.
         tokens = line.split()
@@ -91,6 +95,11 @@ class RubyExecution(BaseExecution):
         return False
 
     def get_method_or_class_name(self, line_number, filename):
+        """Method that get the name of Methods and Classes
+        :param line_number: the number of the line.
+        :param filename: the file that contains this line.
+        :return: String Name.
+        """
         line = linecache.getline(filename, line_number)
 
         # The method or class name is always going to be the second token
@@ -106,6 +115,10 @@ class RubyExecution(BaseExecution):
         return name
 
     def get_class_definition_line(self, file):
+        """This method get the line where a class is defined.
+        :param file: the file that contains this class.
+        :return: the number of the line.
+        """
         file.seek(0)
         for line_number, line in enumerate(file, 1):
             if self.is_class(line):
@@ -113,18 +126,34 @@ class RubyExecution(BaseExecution):
                 return
 
     def get_method_definition_lines(self, file, cov_result):
+        """This method get the line where a method is defined.
+        :param file: The file that contains this method.
+        :param cov_result: .
+        :return: the number of the line.
+        """
         file.seek(0)
         for line_number, line in enumerate(file, 1):
             if self.is_method(line):
                 self.method_definition_lines.append(line_number)
 
     def remove_not_executed_definitions(self, filename, cov_result):
+        """Remote all definitions that was not executed.
+        :param filename: the file that contains this definitions.
+        :param cov_result: json containing the simpleCov result.
+        :return: definitions removed.
+        """
         # Methods that weren't executed aren't relevant, so we remove them here.
         for line in self.method_definition_lines:
             if not self.was_executed(line, filename, cov_result):
                 self.method_definition_lines.remove(line)
 
     def was_executed(self, def_line, filename, cov_result):
+        """Verify if a definitions was executed.
+        :param def_line: Line of a definition.
+        :param filename: the file that contains this definition.
+        :param cov_result: simpleCov json result.
+        :return: True if was executed, and False if not.
+        """
         # We go through the file from the line containing the method definition
         # until its matching 'end' line. We need to keep track of the 'end'
         # keyword appearing in other contexts, e.g. closing other blocks of code.
@@ -155,6 +184,10 @@ class RubyExecution(BaseExecution):
         return False
 
     def is_empty_class(self, file):
+        """Verify if a class is empty
+        :param file: file that will be analysed.
+        :return: True if is empty, and False if not.
+        """
         file.seek(0)
         for line in file:
             if self.is_method(line):
@@ -162,6 +195,10 @@ class RubyExecution(BaseExecution):
         return True
 
     def get_feature_information(self, path):
+        """Get all information in a .feature file.
+        :param path: the path of the .feature file.
+        :return: feature information instantiated.
+        """
 
         self.get_language(path)
         self.feature.path_name = path
@@ -170,6 +207,10 @@ class RubyExecution(BaseExecution):
         self.get_steps(path)
 
     def get_feature_name(self, path):
+        """This method get the feature name.
+        :param path: the path to this feature file.
+        :return: the name of the feature.
+        """
         with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
@@ -178,6 +219,10 @@ class RubyExecution(BaseExecution):
         return
 
     def get_scenarios(self, path):
+        """This method get all scenarios of a feature.
+        :param path: the path to the feature file.
+        :return: all scenarios instantiated.
+        """
         with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
@@ -190,6 +235,10 @@ class RubyExecution(BaseExecution):
         return
 
     def get_steps(self, path):
+        """This method get all steps into each scenario of a feature.
+        :param path: the path to the feature file.
+        :return: all steps instantiated.
+        """
         qt_scenarios = len(self.feature.scenarios)
         key_words = ["Quando ", "E ", "Dado ", "Entao "]
         current_scenario = 0
@@ -205,6 +254,10 @@ class RubyExecution(BaseExecution):
         return
 
     def get_language(self, path):
+        """Get the language of the .feature file.
+        :param path: the path to the .feature file.
+        :return: language.
+        """
         with open(path) as file:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
@@ -213,5 +266,8 @@ class RubyExecution(BaseExecution):
         return
 
     def export_json(self):
+        """This method will export all data to a json file.
+        :return: json file.
+        """
         file = open(self.feature.feature_name + '_result.json', 'w')
         file.write(self.feature.toJSON())
