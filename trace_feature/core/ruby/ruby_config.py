@@ -4,6 +4,7 @@ import sys
 import re
 import subprocess
 
+
 class RubyConfig(BaseConfig):
     def __init__(self):
         pass
@@ -19,7 +20,6 @@ class RubyConfig(BaseConfig):
                 self.check_environment(self.get_local_path())
         else:
             return False
-
 
     def is_rails_project(self, path):
         if os.path.exists(path + "/Gemfile"):

@@ -62,11 +62,6 @@ class RubyExecution(BaseExecution):
                 new_method.class_path = filename
                 self.feature.scenarios[0].executed_methods.append(new_method)
 
-
-
-
-
-
     def is_method(self, line):
         # We only want the first token in the line, to avoid false positives.
         # That is, the word 'def' appearing in some other context.
@@ -156,7 +151,6 @@ class RubyExecution(BaseExecution):
                 return False
         return True
 
-
     def get_feature_information(self, path):
 
         self.get_language(path)
@@ -165,7 +159,6 @@ class RubyExecution(BaseExecution):
         self.get_scenarios(path)
         self.get_steps(path)
 
-
     def get_feature_name(self, path):
         with open(path) as file:
             file.seek(0)
@@ -173,7 +166,6 @@ class RubyExecution(BaseExecution):
                 if "Funcionalidade: " in line:
                     self.feature.feature_name = line.split("Funcionalidade: ",1)[1].replace('\n', '')
         return
-
 
     def get_scenarios(self, path):
         with open(path) as file:
@@ -186,7 +178,6 @@ class RubyExecution(BaseExecution):
                     new_scenario.line = line_number
                     self.feature.scenarios.append(new_scenario)
         return
-
 
     def get_steps(self, path):
         qt_scenarios = len(self.feature.scenarios)
@@ -203,7 +194,6 @@ class RubyExecution(BaseExecution):
                         current_scenario+=1
         return
 
-
     def get_language(self, path):
         with open(path) as file:
             file.seek(0)
@@ -211,7 +201,6 @@ class RubyExecution(BaseExecution):
                 if "#language:" in line:
                     self.feature.language = line.split("#language:",1)[1].replace('\n', '')
         return
-
 
     def export_json(self):
         file = open(self.feature.feature_name + '_result.json', 'w')
