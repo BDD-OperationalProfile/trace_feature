@@ -13,24 +13,29 @@ class RubyExecution(BaseExecution):
 
         self.feature = Feature()
 
-
     # this method will execute all the features at this project
     def execute(self):
         pass
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
+        """This method will execute only a specific feature
+        :param feature_name: define the feature that will be executed
+        :return: a json file with the trace.
+        """
         pass
 
     # this method will execute a specific scenario into a specific feature
     # filename: refer to the .feature file
     # scenario_ref: refer to the line or the name of a specific scenario
     def execute_scenario(self, feature_name, scenario_ref):
+        """This Method will execute only a specific scenario
+        :param feature_name: define the feature that contains this scenario
+        :param scenario_ref: contains a key to get a scenario
+        :return: a json file with the trace.
+        """
         subprocess.call(['rails', 'cucumber', feature_name])
-
-
         self.get_feature_information(feature_name)
-
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -41,10 +46,12 @@ class RubyExecution(BaseExecution):
 
         self.export_json()
 
-    # This method will execute a specific feature file
-    # filename:  the  name of the feature file
-    # cov_result: a array containing the result os simpleCov for some method
     def run_file(self, filename, cov_result):
+        """This method will execute a specific feature file
+        :param filename: the  name of the feature file
+        :param cov_result: a array containing the result os simpleCov for some method
+        :return: Instantiate the Methods executed.
+        """
         self.method_definition_lines = []
         with open(filename) as file:
             if self.is_empty_class(file):
@@ -54,7 +61,6 @@ class RubyExecution(BaseExecution):
             self.get_method_definition_lines(file, cov_result)
             self.remove_not_executed_definitions(filename, cov_result)
 
-
             for method in self.method_definition_lines:
                 new_method = Method()
                 new_method.method_name = self.get_method_or_class_name(method, filename)
@@ -63,6 +69,10 @@ class RubyExecution(BaseExecution):
                 self.feature.scenarios[0].executed_methods.append(new_method)
 
     def is_method(self, line):
+        """Verify if is the line is a method definition.
+        :param line: Line content.
+        :return: True if is a method definition, False if not.
+        """
         # We only want the first token in the line, to avoid false positives.
         # That is, the word 'def' appearing in some other context.
         tokens = line.split()
