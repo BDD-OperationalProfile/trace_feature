@@ -1,5 +1,7 @@
 import click
 import os
+
+from trace_feature.core.features.bdd_read import BddRead
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
 
@@ -15,12 +17,10 @@ def trace(lista, project, feature, scenario):
 
         None of the arguments are required.
     """
+    read = BddRead()
+    if lista:
+        read.list_all_features('.')
 
-    print('project: ', project)
-    print('feature: ', feature)
-    print('scenario: ', scenario)
-    print('List: ', lista)
-    exit()
     # language = find_language(path)
     language = 'Ruby'
     if language == 'Ruby':

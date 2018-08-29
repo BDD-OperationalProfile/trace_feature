@@ -41,7 +41,7 @@ class RubyExecution(BaseExecution):
             json_data = json.load(f)
             for k in json_data:
                 for i in json_data[k]['coverage']:
-                    json_data[k]['coverage'][i]
+                    # json_data[k]['coverage'][i]
                     self.run_file(i, json_data[k]['coverage'][i])
 
         self.export_json()
@@ -229,7 +229,7 @@ class RubyExecution(BaseExecution):
                 if "Cenario: " in line:
                     # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
                     new_scenario = SimpleScenario()
-                    new_scenario.scenario_title = line.split("Cenario: ",1)[1].replace('\n', '')
+                    new_scenario.scenario_title = line.split("Cenario: ", 1)[1].replace('\n', '')
                     new_scenario.line = line_number
                     self.feature.scenarios.append(new_scenario)
         return

@@ -28,8 +28,6 @@ class Feature:
             sort_keys=True, indent=4)
 
 
-
-
 class Scenario(ABC):
 
     def __init__(self):
@@ -59,8 +57,6 @@ class Scenario(ABC):
         pass
 
 
-
-
 class SimpleScenario(Scenario):
 
     def __init__(self):
@@ -75,7 +71,6 @@ class SimpleScenario(Scenario):
     def set_line(self):
         pass
 
-
     def __str__(self):
         print("SCENARIO:")
         print("\t title: " + self.scenario_title)
@@ -89,9 +84,6 @@ class SimpleScenario(Scenario):
             print(method)
 
         return ''
-
-
-
 
 
 class ScenarioOutline(Scenario):
@@ -119,15 +111,12 @@ class ScenarioOutline(Scenario):
         pass
 
 
-
-
 class Method:
 
     def __init__(self):
         self.method_name = ""
         self.class_name = ""
         self.class_path = ""
-
 
     def __str__(self):
         print("METHOD:")
