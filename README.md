@@ -2,7 +2,6 @@
 
 ![PyPI - Python Version](https://img.shields.io/badge/python-3-blue.svg?longCache=true&style=flat-square)
 ![License](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)
-![DSW](https://img.shields.io/badge/Desenho-2018.1-red.svg?Cache=true&style=flat-square)
 
 
 Neste repositório se encontra a ferramenta de geração de _traces_ a partir da execução de cada feature BDD. 
