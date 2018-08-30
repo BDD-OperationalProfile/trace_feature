@@ -1,8 +1,6 @@
 import os
 
-import nltk as nltk
-
-from trace_feature.core.models import Feature, Scenario, SimpleScenario
+from trace_feature.core.models import Feature, SimpleScenario
 
 
 class BddRead:
@@ -15,7 +13,6 @@ class BddRead:
         print('------------------------')
         self.load_infos(initial_path)
         print('Numero de arquivos analisados: ', self.num_files)
-        # print('Numero de funcionalidades: ', num_func)
 
     def load_infos(self,  url):
         for root, dirs, files in os.walk(url):
@@ -24,9 +21,10 @@ class BddRead:
                     self.num_files += 1
                     feature = self.get_feature_information(os.path.join(root, file))
                     self.features.append(feature)
-                    print('---------------------------------------------')
-                    print(feature)
-                    print('---------------------------------------------')
+
+        with open('result.json', 'w+') as file:
+            for feat in self.features:
+                file.write(feat.toJSON() + '\n')
 
     def get_feature_information(self, path):
         """Get all information in a .feature file.
@@ -38,8 +36,7 @@ class BddRead:
         feature.path_name = path
         feature.feature_name = self.get_feature_name(path)
         feature.scenarios = self.get_scenarios(path)
-        self.get_steps(path, feature)
-
+        # feature = self.get_steps(path, feature)
         return feature
 
     def get_feature_name(self, path):
@@ -55,43 +52,50 @@ class BddRead:
                     feature_name = line.split("Funcionalidade: ", 1)[1].replace('\n', '')
         return feature_name
 
+    def get_steps(self, lines, initial, final):
+        key_words = ["Quando ", "E ", "Dado ", "Entao "]
+        steps = []
+        index = initial
+        if final is not None:
+            while index <= final:
+                if any(word in lines[index-1] for word in key_words):
+                    steps.append(lines[index-1].replace('\n', '').replace('  ', ''))
+                index += 1
+        else:
+            while index <= len(lines):
+                if any(word in lines[index-1] for word in key_words):
+                    steps.append(lines[index-1].replace('\n', '').replace('  ', ''))
+                index += 1
+        return steps
+
+    def read_scenario(self, path, initial_line, final_line):
+        scenario = SimpleScenario()
+        with open(path) as file:
+            file.seek(0)
+            lines = file.readlines()
+            scenario.scenario_title = lines[initial_line-1].split("Cenario: ", 1)[1].replace('\n', '')
+            scenario.line = initial_line
+            scenario.steps = self.get_steps(lines, initial_line+1, final_line)
+        return scenario
+
     def get_scenarios(self, path):
         """This method get all scenarios of a feature.
         :param path: the path to the feature file.
         :return: all scenarios instantiated.
         """
         scenarios = []
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if "Cenario: " in line:
-                    # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
-                    new_scenario = SimpleScenario()
-                    new_scenario.scenario_title = line.split("Cenario: ", 1)[1].replace('\n', '')
-                    new_scenario.line = line_number
-                    scenarios.append(new_scenario)
+        lines_scenarios = self.get_all_scenarios_lines(path)
+        count = len(lines_scenarios)
+
+        for index in range(count):
+            scenario = SimpleScenario()
+            if index + 1 >= count:
+                scenario = self.read_scenario(path, lines_scenarios[index], None)
+            else:
+                scenario = self.read_scenario(path, lines_scenarios[index], lines_scenarios[index+1]-1)
+
+            scenarios.append(scenario)
         return scenarios
-
-    def get_steps(self, path, feature):
-        """This method get all steps into each scenario of a feature.
-        :param path: the path to the feature file.
-        :return: all steps instantiated.
-        """
-        print('arquivo: ', feature.path_name)
-        print('tamanho: ', len(feature.scenarios))
-        key_words = ["Quando ", "E ", "Dado ", "Entao "]
-        current_scenario = 0
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if any(word in line for word in key_words):
-                    feature.scenarios[current_scenario].steps.append(line.replace('\n', ''))
-
-                    if feature.scenarios[current_scenario+1].line-1 == line_number:
-                        current_scenario += 1
-                    # if "Entao " in line:
-                    #     current_scenario += 1
-        return
 
     def get_language(self, path):
         """Get the language of the .feature file.
@@ -103,5 +107,14 @@ class BddRead:
             file.seek(0)
             for line_number, line in enumerate(file, 1):
                 if "#language:" in line:
-                    language = line.split("#language:",1)[1].replace('\n', '')
+                    language = line.split("#language:", 1)[1].replace('\n', '')
         return language
+
+    def get_all_scenarios_lines(self, path):
+        lines = []
+        with open(path) as file:
+            file.seek(0)
+            for line_number, line in enumerate(file, 1):
+                if "Cenario:" in line:
+                    lines.append(line_number)
+        return lines
