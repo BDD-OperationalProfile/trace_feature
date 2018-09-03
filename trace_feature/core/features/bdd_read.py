@@ -11,6 +11,12 @@ class BddRead:
         self.num_func = 0
 
     def list_all_features(self, initial_path):
+        """
+        This method show all BDD features into a specific project, with the scenarios and steps.
+        :param initial_path: The base path of this project.
+        :return: print all features.
+        """
+
         print('------------------------')
         self.load_infos(initial_path)
         print('Numero de arquivos analisados: ', self.num_files)
@@ -21,10 +27,20 @@ class BddRead:
             file.write(json_string)
 
     def get_all_features(self, url):
+        """
+        This method get all features, scenarios and steps
+        :param url: base path of the project.
+        :return: a list of Features
+        """
         self.load_infos(url)
         return self.features
 
     def load_infos(self,  url):
+        """
+        This method will instantiate all features with their scenarios
+        :param url: base path of the project.
+        :return: all features with their scenarios.
+        """
         for root, dirs, files in os.walk(url):
             for file in files:
                 if file.endswith(".feature"):
@@ -59,6 +75,13 @@ class BddRead:
         return feature_name
 
     def get_steps(self, lines, initial, final):
+        """
+        This method get all steps into a specific scenario.
+        :param lines: Content of the file.
+        :param initial: The line of the beginning of this scenario
+        :param final: The last line of this scenario.
+        :return: a list of Steps.
+        """
         key_words = ["Quando ", "E ", "Dado ", "Entao "]
         steps = []
         index = initial
@@ -75,6 +98,13 @@ class BddRead:
         return steps
 
     def read_scenario(self, path, initial_line, final_line):
+        """
+        This method read a specific scenario.
+        :param path: Path of the file containing the scenario.
+        :param initial_line: The line of the beginning of this scenario
+        :param final_line: Last line of this scenario.
+        :return: A scenario instantiated.
+        """
         scenario = SimpleScenario()
         with open(path) as file:
             file.seek(0)
@@ -117,6 +147,11 @@ class BddRead:
         return language
 
     def get_all_scenarios_lines(self, path):
+        """
+        This method get the lines of each scenario into a specific file.
+        :param path: The path of this file.
+        :return: The lines.
+        """
         lines = []
         with open(path) as file:
             file.seek(0)

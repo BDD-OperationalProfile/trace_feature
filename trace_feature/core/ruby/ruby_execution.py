@@ -1,7 +1,7 @@
 from trace_feature.core.features.bdd_read import BddRead
 
 from trace_feature.core.base_execution import BaseExecution
-from trace_feature.core.models import Feature, Method, ScenarioOutline, SimpleScenario
+from trace_feature.core.models import Feature, Method
 import linecache
 import subprocess
 import json
@@ -47,7 +47,6 @@ class RubyExecution(BaseExecution):
             json_data = json.load(f)
             for k in json_data:
                 for i in json_data[k]['coverage']:
-                    # json_data[k]['coverage'][i]
                     self.run_file(i, json_data[k]['coverage'][i])
 
         self.export_json()
