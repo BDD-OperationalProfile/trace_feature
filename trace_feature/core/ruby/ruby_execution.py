@@ -21,7 +21,8 @@ class RubyExecution(BaseExecution):
         features = read.get_all_features(path)
         for feature in features:
             self.feature = feature
-            self.execute_scenario(feature.path_name, 10)
+            for scenario in feature.scenarios:
+                self.execute_scenario(feature.path_name, scenario.line)
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
@@ -40,16 +41,17 @@ class RubyExecution(BaseExecution):
         :param scenario_ref: contains a key to get a scenario
         :return: a json file with the trace.
         """
-        subprocess.call(['rails', 'cucumber', feature_name])
+        print('se ligaaaaaa')
+        subprocess.call(['rails', 'cucumber', feature_name + ':', str(scenario_ref)])
         # self.get_feature_information(feature_name)
-
+        print('se ligaaaaaa2')
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
             for k in json_data:
                 for i in json_data[k]['coverage']:
                     self.run_file(i, json_data[k]['coverage'][i])
 
-        self.export_json()
+        self.export_json(feature_name, scenario_ref)
 
     def run_file(self, filename, cov_result):
         """This method will execute a specific feature file
@@ -199,10 +201,10 @@ class RubyExecution(BaseExecution):
                 return False
         return True
 
-    def export_json(self):
+    def export_json(self, feature_name, scenario_ref):
         """This method will export all data to a json file.
         :return: json file.
         """
-        with open(self.feature.feature_name + '_result.json', 'w+') as file:
+        with open(feature_name + '_' + str(scenario_ref) + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
