@@ -1,3 +1,5 @@
+from trace_feature.core.features.bdd_read import BddRead
+
 from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.models import Feature, Method, ScenarioOutline, SimpleScenario
 import linecache
@@ -14,8 +16,12 @@ class RubyExecution(BaseExecution):
         self.feature = Feature()
 
     # this method will execute all the features at this project
-    def execute(self):
-        pass
+    def execute(self, path):
+        read = BddRead()
+        features = read.get_all_features(path)
+        for feature in features:
+            self.feature = feature
+            self.execute_scenario(feature.path_name, 10)
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
@@ -35,7 +41,7 @@ class RubyExecution(BaseExecution):
         :return: a json file with the trace.
         """
         subprocess.call(['rails', 'cucumber', feature_name])
-        self.get_feature_information(feature_name)
+        # self.get_feature_information(feature_name)
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -194,80 +200,10 @@ class RubyExecution(BaseExecution):
                 return False
         return True
 
-    def get_feature_information(self, path):
-        """Get all information in a .feature file.
-        :param path: the path of the .feature file.
-        :return: feature information instantiated.
-        """
-
-        self.get_language(path)
-        self.feature.path_name = path
-        self.get_feature_name(path)
-        self.get_scenarios(path)
-        self.get_steps(path)
-
-    def get_feature_name(self, path):
-        """This method get the feature name.
-        :param path: the path to this feature file.
-        :return: the name of the feature.
-        """
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if "Funcionalidade: " in line:
-                    self.feature.feature_name = line.split("Funcionalidade: ",1)[1].replace('\n', '')
-        return
-
-    def get_scenarios(self, path):
-        """This method get all scenarios of a feature.
-        :param path: the path to the feature file.
-        :return: all scenarios instantiated.
-        """
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if "Cenario: " in line:
-                    # print ("Cenario: " + line.split("Delineacao do Cenario: ",1)[1])
-                    new_scenario = SimpleScenario()
-                    new_scenario.scenario_title = line.split("Cenario: ", 1)[1].replace('\n', '')
-                    new_scenario.line = line_number
-                    self.feature.scenarios.append(new_scenario)
-        return
-
-    def get_steps(self, path):
-        """This method get all steps into each scenario of a feature.
-        :param path: the path to the feature file.
-        :return: all steps instantiated.
-        """
-        qt_scenarios = len(self.feature.scenarios)
-        key_words = ["Quando ", "E ", "Dado ", "Entao "]
-        current_scenario = 0
-
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if any(word in line for word in key_words):
-                    self.feature.scenarios[current_scenario].steps.append(line.replace('\n', ''))
-
-                    if "Entao " in line:
-                        current_scenario+=1
-        return
-
-    def get_language(self, path):
-        """Get the language of the .feature file.
-        :param path: the path to the .feature file.
-        :return: language.
-        """
-        with open(path) as file:
-            file.seek(0)
-            for line_number, line in enumerate(file, 1):
-                if "#language:" in line:
-                    self.feature.language = line.split("#language:",1)[1].replace('\n', '')
-        return
-
     def export_json(self):
         """This method will export all data to a json file.
         :return: json file.
         """
-        file = open(self.feature.feature_name + '_result.json', 'w')
-        file.write(self.feature.toJSON())
+        with open(self.feature.feature_name + '_result.json', 'w+') as file:
+            json_string = json.dumps(self.feature, default=Feature.obj_dict)
+            file.write(json_string)

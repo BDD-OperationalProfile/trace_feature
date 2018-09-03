@@ -14,6 +14,15 @@ class BddRead:
         print('------------------------')
         self.load_infos(initial_path)
         print('Numero de arquivos analisados: ', self.num_files)
+        print('Numero de features analisadas:', len(self.features))
+        print('------------------------')
+        with open('result.json', 'w+') as file:
+            json_string = json.dumps(self.features, default=Feature.obj_dict)
+            file.write(json_string)
+
+    def get_all_features(self, url):
+        self.load_infos(url)
+        return self.features
 
     def load_infos(self,  url):
         for root, dirs, files in os.walk(url):
@@ -22,10 +31,6 @@ class BddRead:
                     self.num_files += 1
                     feature = self.get_feature_information(os.path.join(root, file))
                     self.features.append(feature)
-
-        with open('result.json', 'w+') as file:
-            json_string = json.dumps(self.features, default=Feature.obj_dict)
-            file.write(json_string)
 
     def get_feature_information(self, path):
         """Get all information in a .feature file.

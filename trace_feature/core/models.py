@@ -33,6 +33,7 @@ class Scenario(ABC):
         steps = NotImplemented
         scenario_title = NotImplemented
         line = NotImplemented
+        executed_methods = NotImplemented
 
 
     # @property
@@ -80,7 +81,7 @@ class SimpleScenario(Scenario):
             print("\t\t" + step)
 
         for method in self.executed_methods:
-            print(method)
+            print('\t\t', method)
 
         return ''
 
@@ -119,7 +120,7 @@ class Method:
 
     def __str__(self):
         print("METHOD:")
-        print("\t name: " + self.method_name)
-        print("\t classe: " + self.class_name)
-        print("\t path: " + self.class_path)
+        print("\t\t\t name: " + self.method_name)
+        print("\t\t\t classe: " + self.class_name)
+        print("\t\t\t path: " + self.class_path)
         return ''
