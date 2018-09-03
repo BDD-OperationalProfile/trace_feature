@@ -1,3 +1,4 @@
+import json
 import os
 
 from trace_feature.core.models import Feature, SimpleScenario
@@ -23,8 +24,8 @@ class BddRead:
                     self.features.append(feature)
 
         with open('result.json', 'w+') as file:
-            for feat in self.features:
-                file.write(feat.toJSON() + '\n')
+            json_string = json.dumps(self.features, default=Feature.obj_dict)
+            file.write(json_string)
 
     def get_feature_information(self, path):
         """Get all information in a .feature file.
@@ -73,7 +74,7 @@ class BddRead:
         with open(path) as file:
             file.seek(0)
             lines = file.readlines()
-            scenario.scenario_title = lines[initial_line-1].split("Cenario: ", 1)[1].replace('\n', '')
+            scenario.scenario_title = lines[initial_line-1].split("Cenario: ", 1)[1].replace('\n', '').replace(':', '')
             scenario.line = initial_line
             scenario.steps = self.get_steps(lines, initial_line+1, final_line)
         return scenario
