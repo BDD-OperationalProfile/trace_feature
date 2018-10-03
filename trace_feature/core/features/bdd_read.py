@@ -18,7 +18,6 @@ class BddRead:
         """
 
         print('------------------------')
-        self.load_infos(initial_path)
         print('Numero de arquivos analisados: ', self.num_files)
         print('Numero de features analisadas:', len(self.features))
         print('------------------------')

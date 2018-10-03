@@ -5,6 +5,7 @@ from trace_feature.core.models import Feature, Method
 import linecache
 import subprocess
 import json
+import requests
 
 
 class RubyExecution(BaseExecution):
@@ -142,7 +143,7 @@ class RubyExecution(BaseExecution):
                 self.method_definition_lines.append(line_number)
 
     def remove_not_executed_definitions(self, filename, cov_result):
-        """Remote all definitions that was not executed.
+        """Remove all definitions that was not executed.
         :param filename: the file that contains this definitions.
         :param cov_result: json containing the simpleCov result.
         :return: definitions removed.
@@ -183,6 +184,8 @@ class RubyExecution(BaseExecution):
 
         end_line = current_line - 1
 
+        # Possivel erro dos métodos não tocados pode estar aqui!!!!!!! OLHA AQUI !!!!!!!!!!!!!
+        i = 0
         for line in range(def_line, end_line):
             if cov_result[line]:
                 return True
@@ -206,3 +209,5 @@ class RubyExecution(BaseExecution):
         with open(self.feature.feature_name + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
+            r = requests.post("http://localhost:8000/createproject", json=json_string)
+            print(r.status_code, r.reason)
