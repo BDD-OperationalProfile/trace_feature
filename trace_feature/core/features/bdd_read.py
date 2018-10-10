@@ -1,6 +1,9 @@
 import json
 import os
 
+from gherkin.parser import Parser
+from gherkin.token_scanner import TokenScanner
+
 from trace_feature.core.models import Feature, SimpleScenario
 
 
@@ -140,6 +143,10 @@ class BddRead:
         language = ''
         with open(path) as file:
             file.seek(0)
+            parser = Parser()
+            feature_file = parser.parse(TokenScanner(file.read()))
+            print(feature_file['type'])
+            exit()
             for line_number, line in enumerate(file, 1):
                 if "#language:" in line:
                     language = line.split("#language:", 1)[1].replace('\n', '')

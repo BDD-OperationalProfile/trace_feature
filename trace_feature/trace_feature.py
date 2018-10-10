@@ -1,7 +1,6 @@
 import click
 import os
 
-from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.features.bdd_read import BddRead
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
@@ -18,10 +17,13 @@ def trace(lista, project, feature, scenario):
         None of the arguments are required.
     """
 
+    print('kakakkd')
+
     read = BddRead()
     if lista:
         read.list_all_features(os.path.abspath(project))
 
+    print('kakakkd2')
     if not lista:
         execution = None
         # language = find_language(path)
@@ -33,6 +35,7 @@ def trace(lista, project, feature, scenario):
             if config.config() is False:
                 print('Erro!')
                 exit()
+            print('FOOI')
         if feature == '' and scenario == 0:
             project = os.path.abspath(project)
             execution.execute(project)

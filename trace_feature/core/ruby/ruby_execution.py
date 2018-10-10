@@ -1,3 +1,6 @@
+import os
+from time import sleep
+
 from trace_feature.core.features.bdd_read import BddRead
 
 from trace_feature.core.base_execution import BaseExecution
@@ -21,7 +24,10 @@ class RubyExecution(BaseExecution):
         read = BddRead()
         features = read.get_all_features(path)
         for feature in features:
+            self.method_definition_lines = []
+            self.class_definition_line = None
             self.feature = feature
+            print('ANALISANDO FEATURE: ', feature.feature_name)
             self.execute_scenario(feature.path_name, 10)
 
     # this method will execute only a specific feature
@@ -41,8 +47,10 @@ class RubyExecution(BaseExecution):
         :param scenario_ref: contains a key to get a scenario
         :return: a json file with the trace.
         """
+
         subprocess.call(['rails', 'cucumber', feature_name])
         # self.get_feature_information(feature_name)
+        sleep(5)
 
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
@@ -64,14 +72,15 @@ class RubyExecution(BaseExecution):
                 return
 
             self.get_class_definition_line(file)
-            self.get_method_definition_lines(file, cov_result)
-            self.remove_not_executed_definitions(filename, cov_result)
+            self.get_method_definition_lines(file, filename, cov_result)
+            # self.remove_not_executed_definitions(filename, cov_result)
 
             for method in self.method_definition_lines:
                 new_method = Method()
                 new_method.method_name = self.get_method_or_class_name(method, filename)
                 new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
                 new_method.class_path = filename
+                new_method.method_id = filename + self.get_method_or_class_name(method, filename)
                 self.feature.scenarios[0].executed_methods.append(new_method)
 
     def is_method(self, line):
@@ -131,7 +140,7 @@ class RubyExecution(BaseExecution):
                 self.class_definition_line = line_number
                 return
 
-    def get_method_definition_lines(self, file, cov_result):
+    def get_method_definition_lines(self, file, filename, cov_result):
         """This method get the line where a method is defined.
         :param file: The file that contains this method.
         :param cov_result: .
@@ -140,7 +149,8 @@ class RubyExecution(BaseExecution):
         file.seek(0)
         for line_number, line in enumerate(file, 1):
             if self.is_method(line):
-                self.method_definition_lines.append(line_number)
+                if self.was_executed(line_number, filename, cov_result):
+                    self.method_definition_lines.append(line_number)
 
     def remove_not_executed_definitions(self, filename, cov_result):
         """Remove all definitions that was not executed.
@@ -186,8 +196,10 @@ class RubyExecution(BaseExecution):
 
         # Possivel erro dos métodos não tocados pode estar aqui!!!!!!! OLHA AQUI !!!!!!!!!!!!!
         i = 0
+        print('----------VERIFICANDO METODO:')
         for line in range(def_line, end_line):
             if cov_result[line]:
+                print("FOI TOCADO CARALHO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
                 return True
         return False
 
@@ -206,8 +218,9 @@ class RubyExecution(BaseExecution):
         """This method will export all data to a json file.
         :return: json file.
         """
+
         with open(self.feature.feature_name + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
-            r = requests.post("http://localhost:8000/createproject", json=json_string)
-            print(r.status_code, r.reason)
+            # r = requests.post("http://localhost:8000/createproject", json=json_string)
+            # print(r.status_code, r.reason)
