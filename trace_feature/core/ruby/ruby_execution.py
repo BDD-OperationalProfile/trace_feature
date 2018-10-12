@@ -29,13 +29,15 @@ class RubyExecution(BaseExecution):
             print('----------------------------------------------------------')
             print(feature)
             print('----------------------------------------------------------')
-        exit()
+        # exit()
         # features = read.get_all_features(path)
         for feature in features:
             self.method_definition_lines = []
             self.class_definition_line = None
             self.feature = feature
-            print('ANALISANDO FEATURE: ', feature.feature_name)
+            print('sduhaszifuhdsuofhsdiuhfusdhfiusdhf')
+            print(feature.feature_name)
+            print('ANALISANDO FEATURE: ', feature.path_name)
             self.execute_scenario(feature.path_name, 10)
 
     # this method will execute only a specific feature
@@ -55,7 +57,8 @@ class RubyExecution(BaseExecution):
         :param scenario_ref: contains a key to get a scenario
         :return: a json file with the trace.
         """
-
+        print(feature_name)
+        # exit()
         subprocess.call(['rails', 'cucumber', feature_name])
         # self.get_feature_information(feature_name)
         sleep(5)
