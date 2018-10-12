@@ -6,7 +6,6 @@ from gherkin.token_scanner import TokenScanner
 
 from trace_feature.core.models import Feature, SimpleScenario
 
-
 class BddRead:
     def __init__(self):
         self.features = []

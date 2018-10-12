@@ -4,6 +4,7 @@ from time import sleep
 from trace_feature.core.features.bdd_read import BddRead
 
 from trace_feature.core.base_execution import BaseExecution
+from trace_feature.core.features.gherkin_parser import read_all_bdds
 from trace_feature.core.models import Feature, Method
 import linecache
 import subprocess
@@ -22,7 +23,14 @@ class RubyExecution(BaseExecution):
     # this method will execute all the features at this project
     def execute(self, path):
         read = BddRead()
-        features = read.get_all_features(path)
+        features = read_all_bdds(path)
+
+        for feature in features:
+            print('----------------------------------------------------------')
+            print(feature)
+            print('----------------------------------------------------------')
+        exit()
+        # features = read.get_all_features(path)
         for feature in features:
             self.method_definition_lines = []
             self.class_definition_line = None

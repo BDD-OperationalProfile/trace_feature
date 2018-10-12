@@ -10,6 +10,8 @@ class Feature:
         self.scenarios = []
         self.language = ""
         self.user_story = ""
+        self.tags = []
+        self.line = None
         self.background = None
 
     def __str__(self):
@@ -78,7 +80,7 @@ class SimpleScenario(Scenario):
         print("\t steps: ")
 
         for step in self.steps:
-            print("\t\t" + step)
+            print("\t\t" + step.keyword + step.text)
 
         for method in self.executed_methods:
             print('\t\t', method)
@@ -109,6 +111,13 @@ class ScenarioOutline(Scenario):
 
     def execute(self):
         pass
+
+
+class StepBdd:
+    def __init__(self):
+        self.line = None
+        self.keyword = ""
+        self.text = ""
 
 
 class Method:
