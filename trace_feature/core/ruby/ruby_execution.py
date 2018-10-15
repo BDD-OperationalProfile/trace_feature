@@ -1,6 +1,6 @@
 from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.features.gherkin_parser import read_all_bdds
-from trace_feature.core.models import Feature, Method
+from trace_feature.core.models import Feature, Method, SimpleScenario
 import linecache
 import subprocess
 import json
@@ -14,26 +14,25 @@ class RubyExecution(BaseExecution):
         self.method_definition_lines = []
 
         self.feature = Feature()
+        self.scenario = SimpleScenario()
 
     # this method will execute all the features at this project
     def execute(self, path):
-        # read = BddRead()
+
+        # Getting all features from this project
         features = read_all_bdds(path)
 
-        # for feature in features:
-        #     print('----------------------------------------------------------')
-        #     print(feature)
-        #     print('----------------------------------------------------------')
-        # exit()
-        # features = read.get_all_features(path)
         for feature in features:
             self.method_definition_lines = []
             self.class_definition_line = None
             self.feature = feature
             print(feature.feature_name)
             print('ANALISANDO FEATURE: ', feature.path_name)
-            self.execute_scenario(feature.path_name, 10)
+            for scenario in feature.scenarios:
+                self.execute_scenario(feature.path_name, scenario)
             # exit()
+            self.export_json()
+
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
         """This method will execute only a specific feature
@@ -45,25 +44,23 @@ class RubyExecution(BaseExecution):
     # this method will execute a specific scenario into a specific feature
     # filename: refer to the .feature file
     # scenario_ref: refer to the line or the name of a specific scenario
-    def execute_scenario(self, feature_name, scenario_ref):
+    def execute_scenario(self, feature_name, scenario):
         """This Method will execute only a specific scenario
         :param feature_name: define the feature that contains this scenario
         :param scenario_ref: contains a key to get a scenario
         :return: a json file with the trace.
         """
 
-        p = subprocess.Popen(["rake", "features", "FEATURE=" + feature_name],
+        p = subprocess.Popen(["rake", "features", "FEATURE=" + feature_name + ":" + str(scenario.line)],
                              stdout=subprocess.PIPE)
         print(p.communicate())
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
             for k in json_data:
                 for i in json_data[k]['coverage']:
-                    self.run_file(i, json_data[k]['coverage'][i])
+                    self.run_file(i, json_data[k]['coverage'][i], scenario)
 
-        self.export_json()
-
-    def run_file(self, filename, cov_result):
+    def run_file(self, filename, cov_result, scenario):
         """This method will execute a specific feature file
         :param filename: the  name of the feature file
         :param cov_result: a array containing the result os simpleCov for some method
@@ -83,7 +80,7 @@ class RubyExecution(BaseExecution):
                 new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
                 new_method.class_path = filename
                 new_method.method_id = filename + self.get_method_or_class_name(method, filename)
-                self.feature.scenarios[0].executed_methods.append(new_method)
+                scenario.executed_methods.append(new_method)
 
     def is_method(self, line):
         """Verify if is the line is a method definition.
@@ -221,7 +218,7 @@ class RubyExecution(BaseExecution):
         :return: json file.
         """
 
-        with open(self.feature.feature_name + '_result.json', 'w+') as file:
+        with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
             r = requests.post("http://localhost:8000/createproject", json=json_string)
