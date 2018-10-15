@@ -1,8 +1,3 @@
-import os
-from time import sleep
-
-from trace_feature.core.features.bdd_read import BddRead
-
 from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.features.gherkin_parser import read_all_bdds
 from trace_feature.core.models import Feature, Method
@@ -22,24 +17,23 @@ class RubyExecution(BaseExecution):
 
     # this method will execute all the features at this project
     def execute(self, path):
-        read = BddRead()
+        # read = BddRead()
         features = read_all_bdds(path)
 
-        for feature in features:
-            print('----------------------------------------------------------')
-            print(feature)
-            print('----------------------------------------------------------')
+        # for feature in features:
+        #     print('----------------------------------------------------------')
+        #     print(feature)
+        #     print('----------------------------------------------------------')
         # exit()
         # features = read.get_all_features(path)
         for feature in features:
             self.method_definition_lines = []
             self.class_definition_line = None
             self.feature = feature
-            print('sduhaszifuhdsuofhsdiuhfusdhfiusdhf')
             print(feature.feature_name)
             print('ANALISANDO FEATURE: ', feature.path_name)
             self.execute_scenario(feature.path_name, 10)
-
+            # exit()
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
         """This method will execute only a specific feature
@@ -57,12 +51,10 @@ class RubyExecution(BaseExecution):
         :param scenario_ref: contains a key to get a scenario
         :return: a json file with the trace.
         """
-        print(feature_name)
-        # exit()
-        subprocess.call(['rails', 'cucumber', feature_name])
-        # self.get_feature_information(feature_name)
-        sleep(5)
 
+        p = subprocess.Popen(["rake", "features", "FEATURE=" + feature_name],
+                             stdout=subprocess.PIPE)
+        print(p.communicate())
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
             for k in json_data:
@@ -84,7 +76,6 @@ class RubyExecution(BaseExecution):
 
             self.get_class_definition_line(file)
             self.get_method_definition_lines(file, filename, cov_result)
-            # self.remove_not_executed_definitions(filename, cov_result)
 
             for method in self.method_definition_lines:
                 new_method = Method()
@@ -210,7 +201,7 @@ class RubyExecution(BaseExecution):
         print('----------VERIFICANDO METODO:')
         for line in range(def_line, end_line):
             if cov_result[line]:
-                print("FOI TOCADO CARALHO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
+                print("FOI TOCADO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
                 return True
         return False
 
@@ -233,5 +224,5 @@ class RubyExecution(BaseExecution):
         with open(self.feature.feature_name + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
-            # r = requests.post("http://localhost:8000/createproject", json=json_string)
-            # print(r.status_code, r.reason)
+            r = requests.post("http://localhost:8000/createproject", json=json_string)
+            print(r.status_code, r.reason)

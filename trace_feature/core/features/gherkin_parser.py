@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-
 from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 from trace_feature.core.models import Feature, SimpleScenario, StepBdd
@@ -12,14 +10,15 @@ def read_all_bdds(url):
         for file in files:
             if file.endswith(".feature"):
                 feature = Feature()
-                with open(os.path.join(root, file)) as fp:
+                file_path = os.path.join(root, file)
+                with open(file_path) as fp:
                     fp.seek(0)
                     parser = Parser()
                     feature_file = parser.parse(TokenScanner(fp.read()))
 
                     feature.feature_name = feature_file['feature']['name']
                     feature.language = feature_file['feature']['language']
-                    feature.path_name = str(Path(file).resolve())
+                    feature.path_name = file_path
                     feature.tags = feature_file['feature']['tags']
                     feature.line = feature_file['feature']['location']['line']
                     feature.scenarios = get_scenarios(feature_file['feature']['children'])
