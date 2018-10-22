@@ -1,10 +1,14 @@
+import os
+from collections import Set
+
+import requests
+
 from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.features.gherkin_parser import read_all_bdds
-from trace_feature.core.models import Feature, Method, SimpleScenario
+from trace_feature.core.models import Feature, Method, SimpleScenario, Project
 import linecache
 import subprocess
 import json
-import requests
 
 
 class RubyExecution(BaseExecution):
@@ -12,12 +16,14 @@ class RubyExecution(BaseExecution):
     def __init__(self):
         self.class_definition_line = None
         self.method_definition_lines = []
-
+        self.project = Project()
         self.feature = Feature()
         self.scenario = SimpleScenario()
 
     # this method will execute all the features at this project
     def execute(self, path):
+
+        self.project = self.get_project_infos(path)
 
         # Getting all features from this project
         features = read_all_bdds(path)
@@ -25,12 +31,14 @@ class RubyExecution(BaseExecution):
         for feature in features:
             self.method_definition_lines = []
             self.class_definition_line = None
+            feature.project = self.project
             self.feature = feature
+
             print(feature.feature_name)
             print('ANALISANDO FEATURE: ', feature.path_name)
             for scenario in feature.scenarios:
                 self.execute_scenario(feature.path_name, scenario)
-            # exit()
+
             self.export_json()
 
     # this method will execute only a specific feature
@@ -47,7 +55,7 @@ class RubyExecution(BaseExecution):
     def execute_scenario(self, feature_name, scenario):
         """This Method will execute only a specific scenario
         :param feature_name: define the feature that contains this scenario
-        :param scenario_ref: contains a key to get a scenario
+        :param scenario: contains a key to get a scenario
         :return: a json file with the trace.
         """
 
@@ -64,6 +72,7 @@ class RubyExecution(BaseExecution):
         """This method will execute a specific feature file
         :param filename: the  name of the feature file
         :param cov_result: a array containing the result os simpleCov for some method
+        :param scenario: contains the line where the scenario starts
         :return: Instantiate the Methods executed.
         """
         self.method_definition_lines = []
@@ -142,7 +151,8 @@ class RubyExecution(BaseExecution):
     def get_method_definition_lines(self, file, filename, cov_result):
         """This method get the line where a method is defined.
         :param file: The file that contains this method.
-        :param cov_result: .
+        :param cov_result: contains the result of simplecov.
+        :param filename: contains the name of the analysed file.
         :return: the number of the line.
         """
         file.seek(0)
@@ -193,17 +203,14 @@ class RubyExecution(BaseExecution):
 
         end_line = current_line - 1
 
-        # Possivel erro dos métodos não tocados pode estar aqui!!!!!!! OLHA AQUI !!!!!!!!!!!!!
-        i = 0
-        print('----------VERIFICANDO METODO:')
         for line in range(def_line, end_line):
             if cov_result[line]:
-                print("FOI TOCADO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
+                # print("FOI TOCADO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
                 return True
         return False
 
     def is_empty_class(self, file):
-        """Verify if a class is empty
+        """Verify if a class contains any method
         :param file: file that will be analysed.
         :return: True if is empty, and False if not.
         """
@@ -217,9 +224,35 @@ class RubyExecution(BaseExecution):
         """This method will export all data to a json file.
         :return: json file.
         """
+        # with open(self.project.name + '_result.json', 'w+') as file:
+        #     json_string = json.dumps(self.project, default=Project.obj_dict)
+        #     file.write(json_string)
 
         with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
             r = requests.post("http://localhost:8000/createproject", json=json_string)
             print(r.status_code, r.reason)
+
+    def get_project_infos(self, path):
+        project = Project()
+        project.language = "Ruby on Rails"
+        project.repository = self.verify_git_repository(path)
+        project.name = self.get_name_project(path)
+
+        return project
+
+    def verify_git_repository(self, path):
+        git_path = path + "/.git/"
+        if os.path.exists(git_path):
+            with open(git_path + 'config') as file:
+                for line in file:
+                    if 'url =' in line:
+                        url = line.split(' = ')
+                        return url[1]
+        return None
+
+    def get_name_project(self, path):
+        print('OLHA AQUI O PATH: ', path)
+        path = path.split('/')
+        return path[-1]

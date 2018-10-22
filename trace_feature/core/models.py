@@ -1,6 +1,24 @@
 from abc import ABC, abstractmethod
 
 
+class Project:
+    def __init__(self):
+        self.name = ""
+        self.language = ""
+        self.repository = ""
+
+    def __str__(self):
+        print('PROJETO:')
+        print("\t name: " + self.name)
+        print("\t language: " + self.language)
+        print("\t Repository: " + str(self.repository))
+
+        return ''
+
+    def obj_dict(self):
+        return self.__dict__
+
+
 class Feature:
 
     def __init__(self):
@@ -12,6 +30,7 @@ class Feature:
         self.tags = []
         self.line = None
         self.background = None
+        self.project = ""
 
     def __str__(self):
         print("FEATURE:")
