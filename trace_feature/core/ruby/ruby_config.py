@@ -59,16 +59,18 @@ class RubyConfig(BaseConfig):
             is_on_test = False
             for line in file:
                 tokens = line.split()
+                print('DSOJFSDOFJSODJFOIDSJFOISDJFOISDJIOF', tokens)
                 if self.is_test_group(tokens):
                     is_on_test = True
                 if is_on_test:
                     if not has_simplecov:
                         has_simplecov = self.simplecov_exists(tokens)
-                    if tokens[0] == 'end':
-                        if not has_simplecov:
-                            simplecov_line = SIMPLECOV
-                            output.append(simplecov_line)
-                        is_on_test = False
+                    if tokens:
+                        if tokens[0] == 'end':
+                            if not has_simplecov:
+                                simplecov_line = SIMPLECOV
+                                output.append(simplecov_line)
+                            is_on_test = False
                 output.append(line)
             file.seek(0)
             file.writelines(output)

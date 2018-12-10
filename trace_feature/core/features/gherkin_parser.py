@@ -6,7 +6,7 @@ from trace_feature.core.models import Feature, SimpleScenario, StepBdd
 
 def read_all_bdds(url):
     features = []
-    for root, dirs, files in os.walk(url):
+    for root, dirs, files in os.walk(url + '/features/'):
         for file in files:
             if file.endswith(".feature"):
                 feature = Feature()
@@ -14,6 +14,7 @@ def read_all_bdds(url):
                 with open(file_path) as fp:
                     fp.seek(0)
                     parser = Parser()
+                    print(file_path)
                     feature_file = parser.parse(TokenScanner(fp.read()))
 
                     feature.feature_name = feature_file['feature']['name']

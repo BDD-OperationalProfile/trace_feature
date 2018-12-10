@@ -58,15 +58,21 @@ class RubyExecution(BaseExecution):
         :param scenario: contains a key to get a scenario
         :return: a json file with the trace.
         """
-
-        p = subprocess.Popen(["rake", "features", "FEATURE=" + feature_name + ":" + str(scenario.line)],
+        # print(subprocess.check_output("RAILS_ENV=development"))
+        # os.environ['RAILS_ENV'] = "test"
+        p = subprocess.Popen(["rake", "cucumber", "FEATURE=" + feature_name + ":" + str(scenario.line)],
                              stdout=subprocess.PIPE)
         print(p.communicate())
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
+            print('OLHA ISSO AQUI: ', len(json_data))
             for k in json_data:
                 for i in json_data[k]['coverage']:
-                    self.run_file(i, json_data[k]['coverage'][i], scenario)
+                    if i:
+                        print('executando arquivo!! : ', i)
+                        self.run_file(i, json_data[k]['coverage'][i], scenario)
+                        print('done')
+        print('UMA FOI MANOOOOOO11``----------------------------------')
 
     def run_file(self, filename, cov_result, scenario):
         """This method will execute a specific feature file
@@ -82,14 +88,20 @@ class RubyExecution(BaseExecution):
 
             self.get_class_definition_line(file)
             self.get_method_definition_lines(file, filename, cov_result)
-
+            print('pegou os metodos')
             for method in self.method_definition_lines:
-                new_method = Method()
-                new_method.method_name = self.get_method_or_class_name(method, filename)
-                new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
-                new_method.class_path = filename
-                new_method.method_id = filename + self.get_method_or_class_name(method, filename)
-                scenario.executed_methods.append(new_method)
+                if method is not None:
+                    print('salvando metodo')
+                    new_method = Method()
+                    new_method.method_name = self.get_method_or_class_name(method, filename)
+                    if self.class_definition_line is None:
+                        new_method.class_name = 'None'
+                    else:
+                        new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
+                    new_method.class_path = filename
+                    new_method.method_id = filename + self.get_method_or_class_name(method, filename)
+                    scenario.executed_methods.append(new_method)
+            print('terminou de salvar os metodos')
 
     def is_method(self, line):
         """Verify if is the line is a method definition.
@@ -114,7 +126,8 @@ class RubyExecution(BaseExecution):
         tokens = line.split()
         if tokens:
             first_token = tokens[0]
-            return first_token == 'class'
+            print('classe ou modulo?')
+            return first_token == 'class' or first_token == 'module'
         return False
 
     def get_method_or_class_name(self, line_number, filename):
@@ -123,17 +136,21 @@ class RubyExecution(BaseExecution):
         :param filename: the file that contains this line.
         :return: String Name.
         """
+        # print('NUMERO: ', line_number)
+        # print('FILE: ', filename)
         line = linecache.getline(filename, line_number)
 
+        name = 'None'
         # The method or class name is always going to be the second token
         # in the line.
-        name_token = line.split()[1]
+        if len(line.split()) > 1:
+            name_token = line.split()[1]
 
         # If the method definition contains parameters, part of it will also
         # be in the token though. For example:
         #    def foo(x, y)
         # would become 'foo(x,'. We then separate those parts.
-        name, parenthesis, rest = name_token.partition('(')
+            name, parenthesis, rest = name_token.partition('(')
 
         return name
 
@@ -147,6 +164,7 @@ class RubyExecution(BaseExecution):
             if self.is_class(line):
                 self.class_definition_line = line_number
                 return
+        return
 
     def get_method_definition_lines(self, file, filename, cov_result):
         """This method get the line where a method is defined.
@@ -156,9 +174,13 @@ class RubyExecution(BaseExecution):
         :return: the number of the line.
         """
         file.seek(0)
+        print('pegando os metodos aqui')
         for line_number, line in enumerate(file, 1):
+            print('dentro')
             if self.is_method(line):
+                print('é metodo ', line)
                 if self.was_executed(line_number, filename, cov_result):
+                    print('foi executado')
                     self.method_definition_lines.append(line_number)
 
     def remove_not_executed_definitions(self, filename, cov_result):
@@ -185,7 +207,7 @@ class RubyExecution(BaseExecution):
         remaining_blocks = 1
         current_line = def_line
 
-        block_tokens = ['do', 'if', 'case', 'for', 'begin', 'while']
+        block_tokens = ['do', 'case', 'for', 'begin', 'while']
 
         while remaining_blocks:
             line = linecache.getline(filename, current_line)
