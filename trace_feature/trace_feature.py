@@ -1,8 +1,11 @@
+import signal
+
 import click
 import os
 
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
+
 
 
 @click.command()
@@ -19,7 +22,6 @@ def trace(lista, project, feature, scenario):
     # read = BddRead()
     # if lista:
     #     read.list_all_features(os.path.abspath(project))
-
     if not lista:
         execution = None
         # language = find_language(path)
@@ -29,9 +31,10 @@ def trace(lista, project, feature, scenario):
             execution = RubyExecution()
             config = RubyConfig()
             if config.config() is False:
-                print('Erro!')
+                print('Error!')
                 exit()
-            print('FOOI')
+        if feature and scenario:
+            execution.prepare_scenario(feature, int(scenario))
         if feature == '' and scenario == 0:
             project = os.path.abspath(project)
             execution.execute(project)

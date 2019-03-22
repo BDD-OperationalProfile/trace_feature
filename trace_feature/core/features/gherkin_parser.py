@@ -4,6 +4,19 @@ from gherkin.token_scanner import TokenScanner
 from trace_feature.core.models import Feature, SimpleScenario, StepBdd
 
 
+def get_scenario(feature_path, line):
+    with open(feature_path) as fp:
+        fp.seek(0)
+        parser = Parser()
+        print(feature_path)
+        feature_file = parser.parse(TokenScanner(fp.read()))
+        scenarios = get_scenarios(feature_file['feature']['children'])
+        for each in scenarios:
+            if each.line == line:
+                return each
+        return None
+
+
 def read_all_bdds(url):
     features = []
     for root, dirs, files in os.walk(url + '/features/'):

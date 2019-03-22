@@ -1,10 +1,10 @@
 import os
-from collections import Set
+import signal
 
 import requests
 
 from trace_feature.core.base_execution import BaseExecution
-from trace_feature.core.features.gherkin_parser import read_all_bdds
+from trace_feature.core.features.gherkin_parser import read_all_bdds, get_scenario
 from trace_feature.core.models import Feature, Method, SimpleScenario, Project
 import linecache
 import subprocess
@@ -20,6 +20,10 @@ class RubyExecution(BaseExecution):
         self.feature = Feature()
         self.scenario = SimpleScenario()
 
+    def prepare_scenario(self, feature_path, scenario_line):
+        scenario = get_scenario(feature_path, scenario_line)
+        self.execute_scenario(feature_path, scenario)
+
     # this method will execute all the features at this project
     def execute(self, path):
 
@@ -34,12 +38,11 @@ class RubyExecution(BaseExecution):
             feature.project = self.project
             self.feature = feature
 
-            print(feature.feature_name)
-            print('ANALISANDO FEATURE: ', feature.path_name)
+            print('Execute Feature: ', feature.feature_name)
             for scenario in feature.scenarios:
                 self.execute_scenario(feature.path_name, scenario)
 
-            self.export_json()
+            self.send_information()
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
@@ -60,19 +63,24 @@ class RubyExecution(BaseExecution):
         """
         # print(subprocess.check_output("RAILS_ENV=development"))
         # os.environ['RAILS_ENV'] = "test"
+        print('Executing Scenario: ', scenario.scenario_title)
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         p = subprocess.Popen(["rake", "cucumber", "FEATURE=" + feature_name + ":" + str(scenario.line)],
-                             stdout=subprocess.PIPE)
-        print(p.communicate())
+                         stdout=subprocess.PIPE)
+        # print(p.communicate())
+        # try:
+        #     p.stdout.close()
+        # except BrokenPipeError:
+        #     pass
+        # p.wait()
+        # TODO: analyse this print
         with open('coverage/cucumber/.resultset.json') as f:
             json_data = json.load(f)
-            print('OLHA ISSO AQUI: ', len(json_data))
             for k in json_data:
                 for i in json_data[k]['coverage']:
                     if i:
-                        print('executando arquivo!! : ', i)
                         self.run_file(i, json_data[k]['coverage'][i], scenario)
-                        print('done')
-        print('UMA FOI MANOOOOOO11``----------------------------------')
+        print('Number of executed Methods: ', str(len(scenario.executed_methods)))
 
     def run_file(self, filename, cov_result, scenario):
         """This method will execute a specific feature file
@@ -88,10 +96,8 @@ class RubyExecution(BaseExecution):
 
             self.get_class_definition_line(file)
             self.get_method_definition_lines(file, filename, cov_result)
-            print('pegou os metodos')
             for method in self.method_definition_lines:
                 if method is not None:
-                    print('salvando metodo')
                     new_method = Method()
                     new_method.method_name = self.get_method_or_class_name(method, filename)
                     if self.class_definition_line is None:
@@ -101,7 +107,6 @@ class RubyExecution(BaseExecution):
                     new_method.class_path = filename
                     new_method.method_id = filename + self.get_method_or_class_name(method, filename)
                     scenario.executed_methods.append(new_method)
-            print('terminou de salvar os metodos')
 
     def is_method(self, line):
         """Verify if is the line is a method definition.
@@ -126,7 +131,6 @@ class RubyExecution(BaseExecution):
         tokens = line.split()
         if tokens:
             first_token = tokens[0]
-            print('classe ou modulo?')
             return first_token == 'class' or first_token == 'module'
         return False
 
@@ -136,8 +140,6 @@ class RubyExecution(BaseExecution):
         :param filename: the file that contains this line.
         :return: String Name.
         """
-        # print('NUMERO: ', line_number)
-        # print('FILE: ', filename)
         line = linecache.getline(filename, line_number)
 
         name = 'None'
@@ -174,13 +176,11 @@ class RubyExecution(BaseExecution):
         :return: the number of the line.
         """
         file.seek(0)
-        print('pegando os metodos aqui')
         for line_number, line in enumerate(file, 1):
-            print('dentro')
+            # print('dentro')
             if self.is_method(line):
-                print('é metodo ', line)
                 if self.was_executed(line_number, filename, cov_result):
-                    print('foi executado')
+                    print('Get Method: ', line)
                     self.method_definition_lines.append(line_number)
 
     def remove_not_executed_definitions(self, filename, cov_result):
@@ -227,7 +227,6 @@ class RubyExecution(BaseExecution):
 
         for line in range(def_line, end_line):
             if cov_result[line]:
-                # print("FOI TOCADO: ", cov_result[line], "- Array ", line+5, " - Linha: ", line+1)
                 return True
         return False
 
@@ -242,14 +241,10 @@ class RubyExecution(BaseExecution):
                 return False
         return True
 
-    def export_json(self):
+    def send_information(self):
         """This method will export all data to a json file.
         :return: json file.
         """
-        # with open(self.project.name + '_result.json', 'w+') as file:
-        #     json_string = json.dumps(self.project, default=Project.obj_dict)
-        #     file.write(json_string)
-
         with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
             json_string = json.dumps(self.feature, default=Feature.obj_dict)
             file.write(json_string)
@@ -275,6 +270,5 @@ class RubyExecution(BaseExecution):
         return None
 
     def get_name_project(self, path):
-        print('OLHA AQUI O PATH: ', path)
         path = path.split('/')
         return path[-1]

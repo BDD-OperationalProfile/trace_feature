@@ -27,7 +27,6 @@ class RubyConfig(BaseConfig):
         else:
             return False
 
-    # Adaptar de acordo com o que for feito com o @click
     def get_local_path(self):
         return '.'
 
@@ -59,7 +58,6 @@ class RubyConfig(BaseConfig):
             is_on_test = False
             for line in file:
                 tokens = line.split()
-                print('DSOJFSDOFJSODJFOIDSJFOISDJFOISDJIOF', tokens)
                 if self.is_test_group(tokens):
                     is_on_test = True
                 if is_on_test:
