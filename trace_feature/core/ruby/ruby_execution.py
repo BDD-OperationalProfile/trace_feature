@@ -64,10 +64,10 @@ class RubyExecution(BaseExecution):
         # print(subprocess.check_output("RAILS_ENV=development"))
         # os.environ['RAILS_ENV'] = "test"
         print('Executing Scenario: ', scenario.scenario_title)
-        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         p = subprocess.Popen(["rake", "cucumber", "FEATURE=" + feature_name + ":" + str(scenario.line)],
                          stdout=subprocess.PIPE)
-        # print(p.communicate())
+        print(p.communicate())
         # try:
         #     p.stdout.close()
         # except BrokenPipeError:
