@@ -23,6 +23,8 @@ class Method:
 
 class It:
     def __init__(self):
+        self.project = ""
+        self.file = ""
         self.description = ""
         self.line = None
         self.executed_methods = []

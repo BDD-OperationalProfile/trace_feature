@@ -1,7 +1,7 @@
 import os
-import signal
 
 import requests
+from trace_feature.core.ruby.spec_models import It
 
 from trace_feature.core.base_execution import BaseExecution
 from trace_feature.core.features.gherkin_parser import read_all_bdds, get_scenario
@@ -9,6 +9,8 @@ from trace_feature.core.models import Feature, Method, SimpleScenario, Project
 import linecache
 import subprocess
 import json
+
+from trace_feature.core.ruby.ruby_spec_execution import read_specs
 
 
 class RubyExecution(BaseExecution):
@@ -19,10 +21,41 @@ class RubyExecution(BaseExecution):
         self.project = Project()
         self.feature = Feature()
         self.scenario = SimpleScenario()
+        self.it = It()
+
+    def execute_specs(self, path):
+        specs = read_specs(path)
+        self.project = self.get_project_infos(path)
+        for spec in specs:
+            self.method_definition_lines = []
+            self.class_definition_line = []
+            self.it = spec
+            print('Executing: ', self.it.description)
+            self.execute_it(self.it)
 
     def prepare_scenario(self, feature_path, scenario_line):
         scenario = get_scenario(feature_path, scenario_line)
         self.execute_scenario(feature_path, scenario)
+
+    def execute_it(self, it):
+        print('Executing It: ', it.description)
+        # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        p = subprocess.Popen(["bin/rspec", it.file + ":" + str(it.line)],
+                             stdout=subprocess.PIPE)
+        print(p.communicate())
+        # try:
+        #     p.stdout.close()
+        # except BrokenPipeError:
+        #     pass
+        # p.wait()
+        # TODO: analyse this print
+        with open('coverage/cucumber/.resultset.json') as f:
+            json_data = json.load(f)
+            for k in json_data:
+                for i in json_data[k]['coverage']:
+                    if i:
+                        self.run_file_with_it(i, json_data[k]['coverage'][i], it)
+        print('Number of executed Methods: ', str(len(it.executed_methods)))
 
     # this method will execute all the features at this project
     def execute(self, path):
@@ -81,6 +114,32 @@ class RubyExecution(BaseExecution):
                     if i:
                         self.run_file(i, json_data[k]['coverage'][i], scenario)
         print('Number of executed Methods: ', str(len(scenario.executed_methods)))
+
+    def run_file_with_it(self, filename, cov_result, it):
+        """This method will execute a specific feature file
+        :param filename: the  name of the feature file
+        :param cov_result: a array containing the result os simpleCov for some method
+        :param scenario: contains the line where the scenario starts
+        :return: Instantiate the Methods executed.
+        """
+        self.method_definition_lines = []
+        with open(filename) as file:
+            if self.is_empty_class(file):
+                return
+
+            self.get_class_definition_line(file)
+            self.get_method_definition_lines(file, filename, cov_result)
+            for method in self.method_definition_lines:
+                if method is not None:
+                    new_method = Method()
+                    new_method.method_name = self.get_method_or_class_name(method, filename)
+                    if self.class_definition_line is None:
+                        new_method.class_name = 'None'
+                    else:
+                        new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
+                    new_method.class_path = filename
+                    new_method.method_id = filename + self.get_method_or_class_name(method, filename)
+                    it.executed_methods.append(new_method)
 
     def run_file(self, filename, cov_result, scenario):
         """This method will execute a specific feature file
@@ -245,11 +304,11 @@ class RubyExecution(BaseExecution):
         """This method will export all data to a json file.
         :return: json file.
         """
-        with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
-            json_string = json.dumps(self.feature, default=Feature.obj_dict)
-            file.write(json_string)
-            r = requests.post("http://localhost:8000/createproject", json=json_string)
-            print(r.status_code, r.reason)
+        # with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
+        json_string = json.dumps(self.feature, default=Feature.obj_dict)
+        # file.write(json_string)
+        r = requests.post("http://localhost:8000/createproject", json=json_string)
+        print(r.status_code, r.reason)
 
     def get_project_infos(self, path):
         project = Project()
