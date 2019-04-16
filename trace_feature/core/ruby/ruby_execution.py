@@ -30,7 +30,6 @@ class RubyExecution(BaseExecution):
             self.method_definition_lines = []
             self.class_definition_line = []
             self.it = spec
-            print('Executing: ', self.it.description)
             self.execute_it(self.it)
 
     def prepare_scenario(self, feature_path, scenario_line):
@@ -55,10 +54,25 @@ class RubyExecution(BaseExecution):
                 for i in json_data[k]['coverage']:
                     if i:
                         self.run_file_with_it(i, json_data[k]['coverage'][i], it)
+        self.it.project = self.project
+        self.it.key = it.file + str(it.line)
         print('Number of executed Methods: ', str(len(it.executed_methods)))
+        print(self.it.description)
+        print('Linha: ', self.it.line)
+        print('Arquivo: ', self.it.file)
+        print('Métodos: ', self.it.executed_methods)
+
+        dado = input('Type Enter to continue..')
+        self.send_information(False)
 
     # this method will execute all the features at this project
     def execute(self, path):
+        # Cleaning data
+        # self.class_definition_line = None
+        # self.method_definition_lines = []
+        # self.project = Project()
+        # self.feature = Feature()
+        # self.scenario = SimpleScenario()
 
         self.project = self.get_project_infos(path)
 
@@ -75,7 +89,7 @@ class RubyExecution(BaseExecution):
             for scenario in feature.scenarios:
                 self.execute_scenario(feature.path_name, scenario)
 
-            self.send_information()
+            self.send_information(True)
 
     # this method will execute only a specific feature
     def execute_feature(self, feature_name):
@@ -300,15 +314,20 @@ class RubyExecution(BaseExecution):
                 return False
         return True
 
-    def send_information(self):
+    def send_information(self, bdd):
         """This method will export all data to a json file.
         :return: json file.
         """
-        # with open(self.feature.feature_name + '_' + self.scenario.scenario_title + '_result.json', 'w+') as file:
-        json_string = json.dumps(self.feature, default=Feature.obj_dict)
-        # file.write(json_string)
-        r = requests.post("http://localhost:8000/createproject", json=json_string)
-        print(r.status_code, r.reason)
+        if bdd:
+            json_string = json.dumps(self.feature, default=Feature.obj_dict)
+            # file.write(json_string)
+            r = requests.post("http://localhost:8000/createproject", json=json_string)
+            print(r.status_code, r.reason)
+        else:
+            json_string = json.dumps(self.it, default=It.obj_dict)
+            # file.write(json_string)
+            r = requests.post("http://localhost:8000/covrel/update_spectrum", json=json_string)
+            print(r.status_code, r.reason)
 
     def get_project_infos(self, path):
         project = Project()

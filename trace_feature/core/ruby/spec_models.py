@@ -24,6 +24,7 @@ class Method:
 class It:
     def __init__(self):
         self.project = ""
+        self.key = ""
         self.file = ""
         self.description = ""
         self.line = None
@@ -32,3 +33,5 @@ class It:
     def __str__(self):
         return self.description
 
+    def obj_dict(self):
+        return self.__dict__

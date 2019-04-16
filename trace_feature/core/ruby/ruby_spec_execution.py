@@ -30,10 +30,10 @@ def get_its(file_path):
                     line = line[1][1:-5]
                 else:
                     line = line[1][1:-5]
-                print(line)
                 spec = It()
                 spec.description = line
                 spec.line = number_line
                 spec.file = file_path
+                spec.executed_methods = []
                 its.append(spec)
     return its
