@@ -3,6 +3,8 @@ import signal
 import click
 import os
 
+from trace_feature.core.features.gherkin_parser import read_all_bdds
+from trace_feature.core.ruby.read_methods import read_methods
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
 
@@ -13,7 +15,8 @@ from trace_feature.core.ruby.ruby_config import RubyConfig
 @click.option('--project', '-p', default='.', help='This is the name of the project to be analyzed. Default: current folder.')
 @click.option('--lista', '-l', is_flag=True, help='This option list all features into this project.')
 @click.option('--spec', '-t', is_flag=True, help='This option execute spec files tests into this project.')
-def trace(spec, lista, project, feature, scenario):
+@click.option('--methods', '-m', is_flag=True, help='This option read all methods into this project.')
+def trace(methods, spec, lista, project, feature, scenario):
     """
         This command ables you to run the traces generator's tool by running every BDD feature.
         None of the arguments are required.
@@ -21,38 +24,36 @@ def trace(spec, lista, project, feature, scenario):
 
     print('OLHA AQUI: ',  spec)
 
-    # read = BddRead()
-    # if lista:
-    #     read.list_all_features(os.path.abspath(project))
-    if not lista:
-        execution = None
-        # language = find_language(path)
-        language = 'Ruby'
+    if lista:
+        features = read_all_bdds(os.path.abspath(project))
+        for feature in features:
+            print(feature)
+        print('-----------------------------------')
+        print('Number of Features: ', len(features))
+    else:
 
-        if language == 'Ruby':
-            execution = RubyExecution()
-            config = RubyConfig()
-            if config.config() is False:
-                print('Error!')
-                exit()
-        if spec:
-            execution.execute_specs(os.path.abspath(project))
+        if methods:
+            methods = read_methods(os.path.abspath(project))
+            for method in methods:
+                print('Name: ', method.method_name)
+                print('Path: ', method.class_path)
+            print(len(methods))
         else:
-            if feature and scenario:
-                execution.prepare_scenario(feature, int(scenario))
-            if feature == '' and scenario == 0:
-                project = os.path.abspath(project)
-                execution.execute(project)
+            #  TODO language = find_language(path)
+            language = 'Ruby'
 
-    # Where the function config_project has to be
+            if language == 'Ruby':
+                execution = RubyExecution()
+                config = RubyConfig()
+                if config.config() is False:
+                    print('Error!')
+                    exit()
+                if spec:
+                    execution.execute_specs(os.path.abspath(project))
+                else:
+                    if feature and scenario:
+                        execution.prepare_scenario(feature, int(scenario))
+                    if feature == '' and scenario == 0:
+                        project = os.path.abspath(project)
+                        execution.execute(project)
 
-    # if feature != '' and scenario == 0:
-    #     print('feature')
-    #     feature_name = os.path.join(click.get_app_dir(project), (feature + '.feature'))
-    #     execution.feature(feature_name)
-    # elif feature != '' and scenario != 0:
-    #     print('scenario')
-    #     feature_name = os.path.join(click.get_app_dir(project), (feature + '.feature'))
-    #     execution.execute_scenario(feature_name, scenario)
-    # elif feature == '' and scenario != 0:
-    #     click.echo('Must define a feature to specify a scenario.')

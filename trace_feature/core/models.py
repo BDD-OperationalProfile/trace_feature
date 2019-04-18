@@ -33,15 +33,7 @@ class Feature:
         self.project = ""
 
     def __str__(self):
-        print("FEATURE:")
-        print("\t path: " + self.path_name)
-        print("\t name: " + self.feature_name)
-        print("\t language: " + self.language)
-
-        for scenario in self.scenarios:
-            print(scenario)
-
-        return ''
+        return self.feature_name
 
     def obj_dict(self):
         return self.__dict__

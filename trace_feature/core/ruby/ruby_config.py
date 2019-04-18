@@ -33,7 +33,10 @@ class RubyConfig(BaseConfig):
     def verify_requirements(self, path):
         SIMPLECOV = '  gem \'simplecov-json\'\n'
         REQSIMCOV = 'require \'simplecov-json\''
-        START = 'SimpleCov.start \'rails\''
+        START = 'SimpleCov.start \'rails\' do\n'
+        EXCLUDE_FOLDERS = '    add_filter [\'migrations\', \'db\', \'.git\', \'features\', \'log\', ' \
+                          '\'public\', \'script\', \'spec\', ' \
+                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\', \'bin\']\nend \n'
         RESULT_DIR = 'SimpleCov.coverage_dir \'coverage/cucumber\''
 
         with open(path+"/Gemfile", 'r') as file:
@@ -47,6 +50,8 @@ class RubyConfig(BaseConfig):
         if re.search(re.escape(START), text_file, flags=re.M) is None:
             return False
         if re.search(re.escape(RESULT_DIR), text_file, flags=re.M) is None:
+            return False
+        if re.search(re.escape(EXCLUDE_FOLDERS), text_file, flags=re.M) is None:
             return False
         return True
 
@@ -87,13 +92,17 @@ class RubyConfig(BaseConfig):
 
     def check_environment(self, path):
         REQSIMCOV = ' require \'simplecov-json\'\n'
-        START = ' SimpleCov.start \'rails\'\n'
+        START = ' SimpleCov.start \'rails\' do\n'
+        EXCLUDE_FOLDERS = '    add_filter [\'migrations\', \'db\', \'.git\', \'features\', \'log\', ' \
+                          '\'public\', \'script\', \'spec\', ' \
+                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\', \'bin\']\nend \n'
         RESULT_DIR = ' SimpleCov.coverage_dir \'coverage/cucumber\'\n'
         output = []
         with open(path + '/features/support/env.rb', 'r+') as file:
             has_req = False
             has_start = False
             has_result_dir = False
+            has_filter = False
 
             for line in file:
                 tokens = line.split()
@@ -103,16 +112,21 @@ class RubyConfig(BaseConfig):
                     has_start = True
                 if self.result_dir(tokens):
                     has_result_dir = True
+                if self.simple_cov_exclude(tokens):
+                    has_filter = True
                 output.append(line)
             if not has_req:
                 has_req_line = REQSIMCOV
                 output.insert(6, has_req_line)
-            if not has_start:
-                has_start_line = START
-                output.insert(7, has_start_line)
             if not has_result_dir:
                 has_result_line = RESULT_DIR
-                output.insert(8, has_result_line)
+                output.insert(7, has_result_line)
+            if not has_start:
+                has_start_line = START
+                output.insert(8, has_start_line)
+            if not has_filter:
+                has_exclude_line = EXCLUDE_FOLDERS
+                output.insert(9, has_exclude_line)
 
             file.seek(0)
             file.writelines(output)
@@ -126,6 +140,12 @@ class RubyConfig(BaseConfig):
     def simple_cov_start(self, tokens):
         if len(tokens) > 1:
             if tokens[0] == ' SimpleCov.start' and tokens[1] == '\'rails\'':
+                return True
+        return False
+
+    def simple_cov_exclude(self, tokens):
+        if len(tokens) > 1:
+            if tokens[0] == ' add_filter':
                 return True
         return False
 
