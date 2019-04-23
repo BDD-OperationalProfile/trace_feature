@@ -4,7 +4,7 @@ import requests
 from trace_feature.core.ruby.spec_models import It
 
 from trace_feature.core.base_execution import BaseExecution
-from trace_feature.core.features.gherkin_parser import read_all_bdds, get_scenario
+from trace_feature.core.features.gherkin_parser import read_all_bdds, get_scenario, read_feature
 from trace_feature.core.models import Feature, Method, SimpleScenario, Project
 import linecache
 import subprocess
@@ -93,13 +93,21 @@ class RubyExecution(BaseExecution):
             self.send_information(True)
 
     # this method will execute only a specific feature
-    def execute_feature(self, feature_name):
+    def execute_feature(self, project, feature_name):
         """This method will execute only a specific feature
         :param feature_name: define the feature that will be executed
         :return: a json file with the trace.
         """
-        pass
-
+        self.project = self.get_project_infos(project)
+        feature = read_feature(feature_name)
+        self.method_definition_lines = []
+        self.class_definition_line = None
+        feature.project = self.project
+        self.feature = feature
+        print('Execute Feature: ', feature.feature_name)
+        for scenario in feature.scenarios:
+            self.execute_scenario(feature.path_name, scenario)
+        self.send_information(True)
     # this method will execute a specific scenario into a specific feature
     # filename: refer to the .feature file
     # scenario_ref: refer to the line or the name of a specific scenario

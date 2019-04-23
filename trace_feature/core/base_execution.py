@@ -8,7 +8,7 @@ class BaseExecution(ABC):
 
     # this method will execute only a specific feature
     @abstractmethod
-    def execute_feature(self, filename):
+    def execute_feature(self, path, filename):
         pass
 
     # this method will execute a specific scenario into a specific feature

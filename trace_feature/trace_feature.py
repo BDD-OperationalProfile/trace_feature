@@ -58,6 +58,9 @@ def trace(methods, spec, lista, project, feature, scenario):
                     send_all_methods(methods)
                     if feature and scenario:
                         execution.prepare_scenario(feature, int(scenario))
+                    elif feature != '':
+                        project = os.path.abspath(project)
+                        execution.execute_feature(project, feature)
                     if feature == '' and scenario == 0:
                         project = os.path.abspath(project)
                         execution.execute(project)
