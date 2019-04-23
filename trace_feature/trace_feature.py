@@ -50,8 +50,12 @@ def trace(methods, spec, lista, project, feature, scenario):
                     print('Error!')
                     exit()
                 if spec:
+                    methods = read_methods(os.path.abspath(project))
+                    send_all_methods(methods)
                     execution.execute_specs(os.path.abspath(project))
                 else:
+                    methods = read_methods(os.path.abspath(project))
+                    send_all_methods(methods)
                     if feature and scenario:
                         execution.prepare_scenario(feature, int(scenario))
                     if feature == '' and scenario == 0:

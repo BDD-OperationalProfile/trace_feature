@@ -30,6 +30,7 @@ class RubyExecution(BaseExecution):
             self.method_definition_lines = []
             self.class_definition_line = []
             self.it = spec
+            self.it.project = self.project
             self.execute_it(self.it)
 
     def prepare_scenario(self, feature_path, scenario_line):
