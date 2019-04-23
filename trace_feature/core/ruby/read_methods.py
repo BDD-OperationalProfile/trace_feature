@@ -1,4 +1,7 @@
+import json
 import os
+
+import requests
 
 from trace_feature.core.models import Method
 from trace_feature.core.ruby.ruby_execution import RubyExecution
@@ -43,3 +46,10 @@ def get_methods_line(fp, ruby):
         if ruby.is_method(line):
             methods.append(line_number)
     return methods
+
+
+def send_all_methods(methods):
+    json_string = json.dumps([ob.__dict__ for ob in methods])
+    # file.write(json_string)
+    r = requests.post("http://localhost:8000/createmethods", json=json_string)
+    print(r.status_code, r.reason)

@@ -4,7 +4,7 @@ import click
 import os
 
 from trace_feature.core.features.gherkin_parser import read_all_bdds
-from trace_feature.core.ruby.read_methods import read_methods
+from trace_feature.core.ruby.read_methods import read_methods, send_all_methods
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
 
@@ -34,6 +34,7 @@ def trace(methods, spec, lista, project, feature, scenario):
 
         if methods:
             methods = read_methods(os.path.abspath(project))
+            send_all_methods(methods)
             for method in methods:
                 print('Name: ', method.method_name)
                 print('Path: ', method.class_path)

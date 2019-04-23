@@ -144,3 +144,6 @@ class Method:
         print("\t\t\t classe: " + self.class_name)
         print("\t\t\t path: " + self.class_path)
         return ''
+
+    def obj_dict(self):
+        return self.__dict__
