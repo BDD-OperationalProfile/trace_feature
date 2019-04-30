@@ -121,7 +121,9 @@ class RubyExecution(BaseExecution):
         # os.environ['RAILS_ENV'] = "test"
         print('Executing Scenario: ', scenario.scenario_title)
         # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-        p = subprocess.Popen(["sudo", "rake", "cucumber", "FEATURE=" + feature_name + ":" + str(scenario.line)],
+        p = subprocess.Popen(["bundle", "-v"], stdout=subprocess.PIPE)
+        print(p.communicate())
+        p = subprocess.Popen(["bundle", "exec", "rake", "cucumber", "FEATURE=" + feature_name + ":" + str(scenario.line)],
                          stdout=subprocess.PIPE)
         print(p.communicate())
         # try:

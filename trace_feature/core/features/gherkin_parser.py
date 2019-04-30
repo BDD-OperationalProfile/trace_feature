@@ -41,6 +41,30 @@ def read_all_bdds(url):
     return features
 
 
+def read_feature(feature_path):
+    """
+    Read a specific feature
+    :param feature_path: path of the file that contains the feature
+    :return: Feature object
+    TODO: Refactor to use this method into for loop in read_all_bdds() method
+    """
+    feature = Feature()
+    with open(feature_path) as fp:
+        fp.seek(0)
+        parser = Parser()
+        print(feature_path)
+        feature_file = parser.parse(TokenScanner(fp.read()))
+
+        feature.feature_name = feature_file['feature']['name']
+        feature.language = feature_file['feature']['language']
+        feature.path_name = feature_path
+        feature.tags = feature_file['feature']['tags']
+        feature.line = feature_file['feature']['location']['line']
+        feature.scenarios = get_scenarios(feature_file['feature']['children'])
+
+    return feature
+
+
 def get_scenarios(childrens):
     scenarios = []
     for children in childrens:

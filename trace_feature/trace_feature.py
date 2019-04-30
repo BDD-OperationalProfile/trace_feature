@@ -49,19 +49,23 @@ def trace(methods, spec, lista, project, feature, scenario):
                 if config.config() is False:
                     print('Error!')
                     exit()
-                if spec:
+                elif spec:
                     methods = read_methods(os.path.abspath(project))
                     send_all_methods(methods)
                     execution.execute_specs(os.path.abspath(project))
                 else:
+                    print('Lendo métodos')
                     methods = read_methods(os.path.abspath(project))
                     send_all_methods(methods)
                     if feature and scenario:
+                        print('feature and scenario')
                         execution.prepare_scenario(feature, int(scenario))
                     elif feature != '':
+                        print('feature')
                         project = os.path.abspath(project)
                         execution.execute_feature(project, feature)
-                    if feature == '' and scenario == 0:
+                    else:
+                        print('Full Execution!')
                         project = os.path.abspath(project)
                         execution.execute(project)
 
