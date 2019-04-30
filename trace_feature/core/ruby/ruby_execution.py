@@ -40,7 +40,7 @@ class RubyExecution(BaseExecution):
     def execute_it(self, it):
         print('Executing It: ', it.description)
         # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-        p = subprocess.Popen(["sudo", "bin/rspec", it.file + ":" + str(it.line)],
+        p = subprocess.Popen(["bundle", "exec", "rspec", it.file + ":" + str(it.line)],
                              stdout=subprocess.PIPE)
         print(p.communicate())
         # try:
