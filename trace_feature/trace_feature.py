@@ -4,7 +4,7 @@ import click
 import os
 
 from trace_feature.core.features.gherkin_parser import read_all_bdds
-from trace_feature.core.ruby.read_methods import read_methods, send_all_methods
+from trace_feature.core.ruby.read_methods import read_methods, send_all_methods, install_excellent_gem, analyse_methods
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 from trace_feature.core.ruby.ruby_config import RubyConfig
 
@@ -16,13 +16,12 @@ from trace_feature.core.ruby.ruby_config import RubyConfig
 @click.option('--lista', '-l', is_flag=True, help='This option list all features into this project.')
 @click.option('--spec', '-t', is_flag=True, help='This option execute spec files tests into this project.')
 @click.option('--methods', '-m', is_flag=True, help='This option read all methods into this project.')
-def trace(methods, spec, lista, project, feature, scenario):
+@click.option('--analyse', '-a', is_flag=True, help='This option analyse all methods into this project.')
+def trace(analyse, methods, spec, lista, project, feature, scenario):
     """
         This command ables you to run the traces generator's tool by running every BDD feature.
         None of the arguments are required.
     """
-
-    print('OLHA AQUI: ',  spec)
 
     if lista:
         features = read_all_bdds(os.path.abspath(project))
@@ -33,12 +32,16 @@ def trace(methods, spec, lista, project, feature, scenario):
     else:
 
         if methods:
-            methods = read_methods(os.path.abspath(project))
-            send_all_methods(methods)
-            for method in methods:
+            project_methods = read_methods(os.path.abspath(project))
+            send_all_methods(project_methods)
+            for method in project.methods:
                 print('Name: ', method.method_name)
                 print('Path: ', method.class_path)
-            print(len(methods))
+            print(len(project.methods))
+        elif analyse:
+            project_methods = read_methods(os.path.abspath(project))
+            install_excellent_gem()
+            project_methods.methods = analyse_methods(project_methods.methods)
         else:
             #  TODO language = find_language(path)
             language = 'Ruby'
@@ -50,13 +53,13 @@ def trace(methods, spec, lista, project, feature, scenario):
                     print('Error!')
                     exit()
                 elif spec:
-                    methods = read_methods(os.path.abspath(project))
-                    send_all_methods(methods)
+                    project_methods = read_methods(os.path.abspath(project))
+                    send_all_methods(project_methods)
                     execution.execute_specs(os.path.abspath(project))
                 else:
-                    print('Lendo métodos')
-                    methods = read_methods(os.path.abspath(project))
-                    send_all_methods(methods)
+                    print('Read methods..')
+                    project_methods = read_methods(os.path.abspath(project))
+                    send_all_methods(project_methods)
                     if feature and scenario:
                         print('feature and scenario')
                         execution.prepare_scenario(feature, int(scenario))

@@ -29,6 +29,7 @@ class It:
         self.description = ""
         self.line = None
         self.executed_methods = []
+        self.result = ""
 
     def __str__(self):
         return self.description

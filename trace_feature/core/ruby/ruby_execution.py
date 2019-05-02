@@ -47,33 +47,37 @@ class RubyExecution(BaseExecution):
         # Catches Tuple first element and decode it                     
         test_message = p.communicate()[0]
         test_message = test_message.decode('utf-8')
-        
 
-        # Parses test_message to get number of examples, peding e failures
+        print(test_message)
+        # Parses test_message to get number of examples, peding and failures
         # using regex lib re
 
-        test_examples = re.findall(r"[0-9]+ examples", test_message) 
-        test_pended = re.findall(r"[0-9]+ pending", test_message) 
-        test_failed = re.findall(r"[0-9]+ failures", test_message) 
-
-
-        # Then print all together
-        if test_pended:
-            print("\n" + test_pended[0] + " tests \n") 
-        else:
-            print("There are no pending tests. \n")
-
-        if test_failed:
-            print(test_failed[0] + " tests in this it block \n") 
-        else:
-            print("There are no failed tests. \n")
-
-
-        # And make a comparison to see if there are no failed nor
-        # pended tests
-        if not (len(test_failed) and len(test_pended)):
-            test_success = test_examples[0].split('examples')[0]
-            print(test_success + "tests successed \n")
+        # test_examples = re.findall(r"[0-9]+ examples", test_message)
+        # test_pended = re.findall(r"[0-9]+ pending", test_message)
+        # test_failed = re.findall(r"[0-9]+ failures", test_message)
+        #
+        # print('Olha: ')
+        # print('test_examples: ', test_examples)
+        # print('test_pended', test_pended)
+        # print('test_failed', test_failed)
+        #
+        # # Then print all together
+        # if test_pended:
+        #     print("\n" + test_pended[0] + " tests \n")
+        # else:
+        #     print("There are no pending tests. \n")
+        #
+        # if test_failed[0] != "0":
+        #     print(test_failed[0] + " tests in this it block \n")
+        # else:
+        #     print("There are no failed tests. \n")
+        #
+        #
+        # # And make a comparison to see if there are no failed nor
+        # # pended tests
+        # if not (len(test_failed) and len(test_pended)):
+        #     test_success = test_examples[0].split('examples')[0]
+        #     print(test_success + "tests successed \n")
 
         # try:
         #     p.stdout.close()
@@ -95,7 +99,7 @@ class RubyExecution(BaseExecution):
         print('Arquivo: ', self.it.file)
         print('Métodos: ', self.it.executed_methods)
 
-        dado = input('Type Enter to continue..')
+        # dado = input('Type Enter to continue..')
         self.send_information(False)
 
     # this method will execute all the features at this project
@@ -341,10 +345,13 @@ class RubyExecution(BaseExecution):
 
         end_line = current_line - 1
 
-        for line in range(def_line, end_line):
-            if cov_result[line]:
-                return True
-        return False
+        if end_line - def_line <= 1:
+            return True
+        else:
+            for line in range(def_line, end_line):
+                if cov_result[line]:
+                    return True
+            return False
 
     def is_empty_class(self, file):
         """Verify if a class contains any method

@@ -154,3 +154,5 @@ class RubyConfig(BaseConfig):
             if tokens[0] == ' SimpleCov.coverage_dir and tokens[1] == \'coverage/cucumber\'':
                 return True
         return False
+
+

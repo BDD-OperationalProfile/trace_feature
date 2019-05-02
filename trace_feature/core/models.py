@@ -6,6 +6,7 @@ class Project:
         self.name = ""
         self.language = ""
         self.repository = ""
+        self.methods = []
 
     def __str__(self):
         print('PROJETO:')

@@ -1,15 +1,18 @@
 import json
 import os
+import re
+import subprocess
 
 import requests
 
-from trace_feature.core.models import Method
+from trace_feature.core.models import Method, Project
 from trace_feature.core.ruby.ruby_execution import RubyExecution
 
 
 def read_methods(path):
-    methods = []
     ruby_exec = RubyExecution()
+    project = ruby_exec.get_project_infos(path)
+
     exclude = ['migrations', 'db', '.git', 'log', 'public', 'script', 'spec', 'tmp',
                'vendor', 'lib', 'docker', 'db', 'coverage', 'config', 'bin', 'features']
     for root, dirs, files in os.walk(path):
@@ -35,8 +38,8 @@ def read_methods(path):
                                         ruby_exec.class_definition_line, file_path)
                                 new_method.class_path = file_path
                                 new_method.method_id = file_path + ruby_exec.get_method_or_class_name(method, file_path)
-                                methods.append(new_method)
-    return methods
+                                project.methods.append(new_method)
+    return project
 
 
 def get_methods_line(fp, ruby):
@@ -48,8 +51,55 @@ def get_methods_line(fp, ruby):
     return methods
 
 
-def send_all_methods(methods):
-    json_string = json.dumps([ob.__dict__ for ob in methods])
+def send_all_methods(project):
+    json_string = json.dumps(project, default=Project.obj_dict)
     # file.write(json_string)
     r = requests.post("http://localhost:8000/createmethods", json=json_string)
     print(r.status_code, r.reason)
+
+
+def install_excellent_gem():
+    p = subprocess.Popen(["gem", "install", "excellent"], stdout=subprocess.PIPE)
+
+    # Catches Tuple first element and decode it
+    test_message = p.communicate()[0]
+    test_message = test_message.decode('utf-8')
+    # print(test_message)
+
+
+def execute_excellent_gem(file):
+    p = subprocess.Popen(["excellent", file], stdout=subprocess.PIPE)
+
+    # Catches Tuple first element and decode it
+    test_message = p.communicate()[0]
+    test_message = test_message.decode('utf-8')
+    print(test_message)
+    return test_message
+
+
+def get_abc_score(result, method):
+    result = result.split('* Line  ')
+
+    for line in result:
+        if method.class_name + "#" in line:
+            # print('ENTROU')
+            name = line.split(method.class_name+"#")[1].split(' ')[0].replace(' ', '')
+            # print('name: ', name)
+            if name == method.method_name:
+                if 'abc score of ' in line:
+                    abc = line.split('abc score of ')[1]
+                    abc = re.findall("\d+\.\d+", abc)
+                    if len(abc) > 0:
+                        return float(abc[0])
+
+
+def analyse_methods(methods):
+    for method in methods:
+        result = execute_excellent_gem(method.class_path)
+        method.abc_score = get_abc_score(result, method)
+        # method.cyclomatic_complexity = cyclomatic_complexity(result, method)
+
+    for method in methods:
+        print(method.method_name, ': ', method.abc_score)
+
+    return methods
