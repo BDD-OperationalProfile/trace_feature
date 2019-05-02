@@ -138,6 +138,7 @@ class Method:
         self.method_name = ""
         self.class_name = ""
         self.class_path = ""
+        self.abc_score = 0
 
     def __str__(self):
         print("METHOD:")
