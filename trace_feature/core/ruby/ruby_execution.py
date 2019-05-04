@@ -37,6 +37,7 @@ class RubyExecution(BaseExecution):
     def prepare_scenario(self, feature_path, scenario_line):
         scenario = get_scenario(feature_path, scenario_line)
         self.execute_scenario(feature_path, scenario)
+        self.send_information(True)
 
     def execute_it(self, it):
         print('Executing It: ', it.description)
@@ -147,6 +148,8 @@ class RubyExecution(BaseExecution):
     # this method will execute a specific scenario into a specific feature
     # filename: refer to the .feature file
     # scenario_ref: refer to the line or the name of a specific scenario
+
+
     def execute_scenario(self, feature_name, scenario):
         """This Method will execute only a specific scenario
         :param feature_name: define the feature that contains this scenario
@@ -199,14 +202,15 @@ class RubyExecution(BaseExecution):
                     else:
                         new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
                     new_method.class_path = filename
-                    new_method.method_id = filename + self.get_method_or_class_name(method, filename)
+                    new_method.method_id = filename + self.get_method_or_class_name(method,
+                                                                                    filename) + str(method)
                     it.executed_methods.append(new_method)
 
     def run_file(self, filename, cov_result, scenario):
         """This method will execute a specific feature file
         :param filename: the  name of the feature file
         :param cov_result: a array containing the result os simpleCov for some method
-        :param scenario: contains the line where the scenario starts
+        :param scenario: contains the executed scenario
         :return: Instantiate the Methods executed.
         """
         self.method_definition_lines = []
@@ -225,7 +229,9 @@ class RubyExecution(BaseExecution):
                     else:
                         new_method.class_name = self.get_method_or_class_name(self.class_definition_line, filename)
                     new_method.class_path = filename
-                    new_method.method_id = filename + self.get_method_or_class_name(method, filename)
+                    new_method.method_id = filename + self.get_method_or_class_name(method,
+                                                                                    filename) + str(method)
+
                     scenario.executed_methods.append(new_method)
 
     def is_method(self, line):

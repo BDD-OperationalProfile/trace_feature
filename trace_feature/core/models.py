@@ -134,6 +134,7 @@ class StepBdd:
 class Method:
 
     def __init__(self):
+        self.line = None
         self.method_id = ""
         self.method_name = ""
         self.class_name = ""

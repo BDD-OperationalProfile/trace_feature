@@ -33,8 +33,10 @@ def trace(analyse, methods, spec, lista, project, feature, scenario):
 
         if methods:
             project_methods = read_methods(os.path.abspath(project))
+            install_excellent_gem()
+            project_methods.methods = analyse_methods(project_methods.methods)
             send_all_methods(project_methods)
-            for method in project.methods:
+            for method in project_methods:
                 print('Name: ', method.method_name)
                 print('Path: ', method.class_path)
             print(len(project.methods))
@@ -59,11 +61,11 @@ def trace(analyse, methods, spec, lista, project, feature, scenario):
                     send_all_methods(project_methods)
                     execution.execute_specs(os.path.abspath(project))
                 else:
-                    print('Read methods..')
-                    project_methods = read_methods(os.path.abspath(project))
-                    install_excellent_gem()
-                    project_methods.methods = analyse_methods(project_methods.methods)
-                    send_all_methods(project_methods)
+                    # print('Read methods..')
+                    # project_methods = read_methods(os.path.abspath(project))
+                    # install_excellent_gem()
+                    # project_methods.methods = analyse_methods(project_methods.methods)
+                    # send_all_methods(project_methods)
                     if feature and scenario:
                         print('feature and scenario')
                         execution.prepare_scenario(feature, int(scenario))

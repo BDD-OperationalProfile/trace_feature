@@ -36,7 +36,7 @@ class RubyConfig(BaseConfig):
         START = 'SimpleCov.start \'rails\' do\n'
         EXCLUDE_FOLDERS = '    add_filter [\'migrations\', \'db\', \'.git\', \'features\', \'log\', ' \
                           '\'public\', \'script\', \'spec\', ' \
-                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\', \'bin\']\nend \n'
+                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\']\nend \n'
         RESULT_DIR = 'SimpleCov.coverage_dir \'coverage/cucumber\''
 
         with open(path+"/Gemfile", 'r') as file:
@@ -95,7 +95,7 @@ class RubyConfig(BaseConfig):
         START = ' SimpleCov.start \'rails\' do\n'
         EXCLUDE_FOLDERS = '    add_filter [\'migrations\', \'db\', \'.git\', \'features\', \'log\', ' \
                           '\'public\', \'script\', \'spec\', ' \
-                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\', \'bin\']\nend \n'
+                          '\'tmp\', \'vendor\', \'lib\', \'docker\', \'db\', \'coverage\', \'config\']\nend \n'
         RESULT_DIR = ' SimpleCov.coverage_dir \'coverage/cucumber\'\n'
         output = []
         with open(path + '/features/support/env.rb', 'r+') as file:
