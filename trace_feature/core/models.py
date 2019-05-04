@@ -139,6 +139,9 @@ class Method:
         self.class_name = ""
         self.class_path = ""
         self.abc_score = 0
+        self.complexity = 0
+        self.number_of_lines = 0
+        self.content = ""
 
     def __str__(self):
         print("METHOD:")
