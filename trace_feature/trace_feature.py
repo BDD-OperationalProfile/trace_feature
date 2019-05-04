@@ -36,10 +36,10 @@ def trace(analyse, methods, spec, lista, project, feature, scenario):
             install_excellent_gem()
             project_methods.methods = analyse_methods(project_methods.methods)
             send_all_methods(project_methods)
-            for method in project_methods:
+            for method in project_methods.methods:
                 print('Name: ', method.method_name)
                 print('Path: ', method.class_path)
-            print(len(project.methods))
+            print(len(project_methods.methods))
         elif analyse:
             project_methods = read_methods(os.path.abspath(project))
             install_excellent_gem()

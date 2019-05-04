@@ -70,7 +70,7 @@ def read_methods(path):
                                 new_method.class_path = file_path
                                 new_method.method_id = file_path + \
                                                        ruby_exec.get_method_or_class_name(method,
-                                                                                          file_path) + new_method.line
+                                                                                          file_path) + str(new_method.line)
                                 project.methods.append(new_method)
                                 print('Método: ')
                                 print(new_method.method_name)
@@ -119,8 +119,10 @@ def get_abc_score(result, method):
 
     for line in result:
         if method.class_name + "#" in line:
-            line_number = re.findall("\d+", line.split(':')[0])[0]
-            if line_number == method.line:
+            # print('ENTROU')
+            name = line.split(method.class_name + "#")[1].split(' ')[0].replace(' ', '')
+            # print('name: ', name)
+            if name == method.method_name:
                 if 'abc score of ' in line:
                     abc = line.split('abc score of ')[1]
                     abc = re.findall("\d+\.\d+", abc)
@@ -134,8 +136,10 @@ def get_cyclomatic_complexity(result, method):
 
     for line in result:
         if method.class_name + "#" in line:
-            line_number = re.findall("\d+", line.split(':')[0])[0]
-            if line_number == method.line:
+            # print('ENTROU')
+            name = line.split(method.class_name + "#")[1].split(' ')[0].replace(' ', '')
+            # print('name: ', name)
+            if name == method.method_name:
                 if 'has cyclomatic complexity of ' in line:
                     complexity = line.split('has cyclomatic complexity of ')[1]
                     complexity = re.findall("\d+", complexity)
@@ -149,8 +153,10 @@ def get_number_of_lines(result, method):
 
     for line in result:
         if method.class_name + "#" in line:
-            line_number = re.findall("\d+", line.split(':')[0])[0]
-            if line_number == method.line:
+            # print('ENTROU')
+            name = line.split(method.class_name + "#")[1].split(' ')[0].replace(' ', '')
+            # print('name: ', name)
+            if name == method.method_name:
                 number_of_lines = re.findall("has \d+ lines.", line)
                 if len(number_of_lines) > 0:
                         return float(re.findall("\d+", number_of_lines[0])[0])
@@ -158,7 +164,6 @@ def get_number_of_lines(result, method):
 
 
 def analyse_methods(methods):
-
     for method in methods:
         result = execute_excellent_gem(method.class_path)
         method.abc_score = get_abc_score(result, method)
