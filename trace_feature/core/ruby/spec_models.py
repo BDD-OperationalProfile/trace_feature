@@ -30,6 +30,9 @@ class It:
         self.line = None
         self.executed_methods = []
         self.result = ""
+        self.succeed = False
+        self.failed = False
+        self.pending = False
 
     def __str__(self):
         return self.description
