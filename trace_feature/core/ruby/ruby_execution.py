@@ -42,44 +42,31 @@ class RubyExecution(BaseExecution):
     def execute_it(self, it):
         print('Executing It: ', it.description)
         # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
-        p = subprocess.Popen(["bundle", "exec", "rspec", it.file + ":" + str(it.line)],
+        p = subprocess.Popen(["bundle", "exec", "rspec", it.file + ":" + str(it.line + 1)],
                              stdout=subprocess.PIPE)
 
         # Catches Tuple first element and decode it                     
         test_message = p.communicate()[0]
         test_message = test_message.decode('utf-8')
 
+        print("Test message: ")
         print(test_message)
+
         # Parses test_message to get number of examples, peding and failures
         # using regex lib re
 
-        # test_examples = re.findall(r"[0-9]+ examples", test_message)
-        # test_pended = re.findall(r"[0-9]+ pending", test_message)
-        # test_failed = re.findall(r"[0-9]+ failures", test_message)
-        #
-        # print('Olha: ')
-        # print('test_examples: ', test_examples)
-        # print('test_pended', test_pended)
-        # print('test_failed', test_failed)
-        #
-        # # Then print all together
-        # if test_pended:
-        #     print("\n" + test_pended[0] + " tests \n")
-        # else:
-        #     print("There are no pending tests. \n")
-        #
-        # if test_failed[0] != "0":
-        #     print(test_failed[0] + " tests in this it block \n")
-        # else:
-        #     print("There are no failed tests. \n")
-        #
-        #
-        # # And make a comparison to see if there are no failed nor
-        # # pended tests
-        # if not (len(test_failed) and len(test_pended)):
-        #     test_success = test_examples[0].split('examples')[0]
-        #     print(test_success + "tests successed \n")
-
+        failed_example = re.findall(r"[1-9]+ failure", test_message)
+        pending_example = re.findall(r"[1-9]+ pending", test_message)
+        succeed_example = re.findall(r"0 failures", test_message)
+        
+        
+        if failed_example:
+            self.it.failed = True
+        if pending_example:
+            self.it.pending = True
+        if succeed_example:
+            self.it.succeed = True
+            
         # try:
         #     p.stdout.close()
         # except BrokenPipeError:
