@@ -19,7 +19,7 @@ def get_scenario(feature_path, line):
 
 def read_all_bdds(url):
     features = []
-    for root, dirs, files in os.walk(url + '/features/'):
+    for root, dirs, files in os.walk(url):
         for file in files:
             if file.endswith(".feature"):
                 feature = Feature()

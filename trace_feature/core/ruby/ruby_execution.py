@@ -1,4 +1,5 @@
 import os
+import time
 
 import requests
 from trace_feature.core.ruby.spec_models import It
@@ -142,8 +143,10 @@ class RubyExecution(BaseExecution):
         feature.project = self.project
         self.feature = feature
         print('Execute Feature: ', feature.feature_name)
+        t0 = time.time()
         for scenario in feature.scenarios:
             self.execute_scenario(feature.path_name, scenario)
+        print('Tempo de execução: ', time.time() - t0)
         self.send_information(True)
     # this method will execute a specific scenario into a specific feature
     # filename: refer to the .feature file
@@ -406,3 +409,20 @@ class RubyExecution(BaseExecution):
     def get_name_project(self, path):
         path = path.split('/')
         return path[-1]
+
+    def execute_without_inst(self):
+
+        scenario1 = '/Users/rafaelfazzolinopintobarbosa/Documents/mestrado/bdd_examples/diaspora/features/desktop/activity_stream.feature:11'
+        scenario2 = '/Users/rafaelfazzolinopintobarbosa/Documents/mestrado/bdd_examples/diaspora/features/desktop/activity_stream.feature:34'
+        t0 = time.time()
+        p = subprocess.Popen(
+            ["bundle", "exec", "rake", "cucumber", "FEATURE=" + scenario1], stdout=subprocess.PIPE)
+        print(p.communicate())
+        print("Tempo de execução: ", time.time() - t0)
+        t1 = time.time()
+        p = subprocess.Popen(
+            ["bundle", "exec", "rake", "cucumber", "FEATURE=" + scenario2], stdout=subprocess.PIPE)
+        print(p.communicate())
+        print("Tempo de execução: ", time.time() - t1)
+        print("Tempo total 2 scenarios: ", time.time() - t0)
+        print(time.clock())

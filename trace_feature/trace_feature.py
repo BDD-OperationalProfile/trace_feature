@@ -1,3 +1,4 @@
+import json
 import signal
 
 import click
@@ -17,7 +18,8 @@ from trace_feature.core.ruby.ruby_config import RubyConfig
 @click.option('--spec', '-t', is_flag=True, help='This option execute spec files tests into this project.')
 @click.option('--methods', '-m', is_flag=True, help='This option read all methods into this project.')
 @click.option('--analyse', '-a', is_flag=True, help='This option analyse all methods into this project.')
-def trace(analyse, methods, spec, lista, project, feature, scenario):
+@click.option('--without', '-w', is_flag=True, help='This option run features without analysis.')
+def trace(without, analyse, methods, spec, lista, project, feature, scenario):
     """
         This command ables you to run the traces generator's tool by running every BDD feature.
         None of the arguments are required.
@@ -27,11 +29,40 @@ def trace(analyse, methods, spec, lista, project, feature, scenario):
         features = read_all_bdds(os.path.abspath(project))
         for feature in features:
             print(feature)
-        print('-----------------------------------')
-        print('Number of Features: ', len(features))
-    else:
 
-        if methods:
+        num_scenarios = 0
+        num_steps = 0
+
+        with open('features.txt', 'w') as file:
+            print('Projeto:', 'SISBOL', file=file)
+            for feature in features:
+                print('\tFeature:', feature.feature_name, file=file)
+                num_scenarios += len(feature.scenarios)
+                print('\tNúmero de Cenários: ', len(feature.scenarios), file=file)
+                print('\tPath: ', feature.path_name, file=file)
+                print('\tLinguagem: ', feature.language, file=file)
+                print('\tCenarios: ', file=file)
+                for scenario in feature.scenarios:
+                    print('\t\tCenario: ', scenario.scenario_title, file=file)
+                    print('\t\tNúmero de Steps: ', len(scenario.steps), file=file)
+                    print('\t\tSteps:', file=file)
+                    num_steps += len(scenario.steps)
+                    for step in scenario.steps:
+                        print('\t\t\tKeyword: ', step.keyword, file=file)
+                        print('\t\t\tTexto: ', step.text, file=file)
+
+            print('\n\n\n-------------------------------------------------------------------------------------------', file=file)
+            print('Number of Features: ', len(features), file=file)
+            print('Number of Scenarios: ', num_scenarios, file=file)
+            print('Number of Steps: ', num_steps, file=file)
+
+    else:
+        if without:
+            print('Sem perda de tempo')
+            execution = RubyExecution()
+            execution.execute_without_inst()
+
+        elif methods:
             project_methods = read_methods(os.path.abspath(project))
             install_excellent_gem()
             project_methods.methods = analyse_methods(project_methods.methods)

@@ -78,6 +78,9 @@ class SimpleScenario(Scenario):
         self.line = None
         self.executed_methods = []
 
+    def obj_dict(self):
+        return self.__dict__
+
     def execute(self):
         pass
 
@@ -129,6 +132,9 @@ class StepBdd:
         self.line = None
         self.keyword = ""
         self.text = ""
+
+    def obj_dict(self):
+        return self.__dict__
 
 
 class Method:
