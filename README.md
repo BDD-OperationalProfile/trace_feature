@@ -73,6 +73,25 @@ trace-feature --help
 
 Para execução completa da análise de features e métodos, devemos subir o servidor de análise de dados, com código fonte disponível *[aqui](https://github.com/BDD-OperationalProfile/server_op)*. Então, devemos executar esta ferramenta na seguinte ordem:
 
+Primeiramente instalar Excellent:
+
+
+```shell
+gem install excellent
+```
+
+Então devemos incluir um arquivo de configuração onde vamos definir os dados que deverão ser obtidos pela gema Excellent. Para isso, crie um arquivo chamado .excellent.yml na pasta raíz do projeto analisado. Então inclua as seguintes linhas no arquivo:
+
+```c
+AbcMetricMethodCheck: True	
+CyclomaticComplexityMethodCheck:
+      threshold: 0
+MethodLineCountCheck:
+      threshold: 0
+```
+
+Feito isso, execute: 
+
 ```shell
 trace-feature -m
 ```
