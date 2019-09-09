@@ -71,4 +71,15 @@ Para obter ajuda sobre o comando e os argumentos, basta usar
 trace-feature --help
 ```
 
-Nossa biblioteca, por se tratar de um projeto de contribuição, iniciou-se, em seu controle de versão, a partir de um fork realizado do projeto já existente, a versão inicial da biblioteca, pode ser encontrada *[aqui](https://github.com/BDD-OperationalProfile/trace_feature)*.
+Para execução completa da análise de features e métodos, devemos subir o servidor de análise de dados, com código fonte disponível *[aqui](https://github.com/BDD-OperationalProfile/server_op)*. Então, devemos executar esta ferramenta na seguinte ordem:
+
+```shell
+trace-feature -m
+```
+Aguardar a conclusão da análise de todos os métodos do projeto e executar:
+
+
+```shell
+trace-feature
+```
+
