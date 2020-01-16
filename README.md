@@ -4,8 +4,8 @@
 ![License](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)
 
 
-Neste repositório se encontra a ferramenta de geração de _traces_ a partir da execução de cada feature BDD. 
-O link para acesso das documetações se encontra *[aqui](https://trace-features-bdd.github.io/trace_feature_docs/)*.
+<!---Neste repositório se encontra a ferramenta de geração de _traces_ a partir da execução de cada feature BDD. 
+O link para acesso das documetações se encontra *[aqui](https://trace-features-bdd.github.io/trace_feature_docs/)*. --->
 
 ## Instalação
 
